@@ -2,7 +2,7 @@
 
 Aplicativo Android nativo para listas de compras por categorias, focado em uso rápido, armazenamento local e baixo consumo.
 
-**Versão inicial:** 1.0.0+1  
+**Versão atual:** 1.0.1+2  
 **applicationId:** `com.listanomade.app`
 
 ## Funcionalidades
@@ -48,7 +48,7 @@ python3 scripts/verify_versions.py
 gradle :app:assembleDebug
 ```
 
-Para Release assinado, defina `ANDROID_KEYSTORE_PATH`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS` e `ANDROID_KEY_PASSWORD` antes do build.
+Para Release assinado, defina `ANDROID_KEYSTORE_PATH`, `KEYSTORE_PASSWORD`, `KEY_ALIAS` e `KEY_PASSWORD` antes do build.
 
 ## GitHub Actions
 

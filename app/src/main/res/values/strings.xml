@@ -48,8 +48,8 @@
     <string name="loading">Carregando…</string>
 
     <string-array name="recent_changes">
-        <item>Listas independentes por categorias, com total geral e total por categoria.</item>
-        <item>Itens com preço, quantidade, edição, exclusão e status comprado sem remover da lista.</item>
-        <item>Persistência SQLite, tema claro/escuro e integração inicial com GitHub Manager e GitHub Release.</item>
+        <item>Assinatura do GitHub Actions compatível com os Secrets importados pelo GitHub Manager.</item>
+        <item>Compatibilidade mantida com os nomes antigos de Secrets que usam o prefixo ANDROID_.</item>
+        <item>Validação de assinatura aprimorada antes da compilação Release.</item>
     </string-array>
 </resources>

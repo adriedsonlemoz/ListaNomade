@@ -33,36 +33,40 @@ jobs:
         with:
           gradle-version: '8.10.2'
 
-      - name: Validar Secrets de assinatura
+      - name: Preparar assinatura permanente
         shell: bash
         env:
-          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-          STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          KEYSTORE_B64: ${{ secrets.KEYSTORE_BASE64 || secrets.ANDROID_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD || secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS_VALUE: ${{ secrets.KEY_ALIAS || secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD_VALUE: ${{ secrets.KEY_PASSWORD || secrets.ANDROID_KEY_PASSWORD }}
         run: |
-          test -n "$KEYSTORE_B64" || { echo "ANDROID_KEYSTORE_BASE64 ausente"; exit 1; }
-          test -n "$STORE_PASSWORD" || { echo "ANDROID_KEYSTORE_PASSWORD ausente"; exit 1; }
-          test -n "$KEY_ALIAS" || { echo "ANDROID_KEY_ALIAS ausente"; exit 1; }
-          test -n "$KEY_PASSWORD" || { echo "ANDROID_KEY_PASSWORD ausente"; exit 1; }
+          test -n "$KEYSTORE_B64" || { echo "Secret ausente: KEYSTORE_BASE64 (ou ANDROID_KEYSTORE_BASE64)"; exit 1; }
+          test -n "$STORE_PASSWORD" || { echo "Secret ausente: KEYSTORE_PASSWORD (ou ANDROID_KEYSTORE_PASSWORD)"; exit 1; }
+          test -n "$KEY_ALIAS_VALUE" || { echo "Secret ausente: KEY_ALIAS (ou ANDROID_KEY_ALIAS)"; exit 1; }
+          test -n "$KEY_PASSWORD_VALUE" || { echo "Secret ausente: KEY_PASSWORD (ou ANDROID_KEY_PASSWORD)"; exit 1; }
 
-      - name: Preparar chave permanente
-        shell: bash
-        env:
-          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-        run: |
           mkdir -p "$RUNNER_TEMP/lista-nomade-signing"
           printf '%s' "$KEYSTORE_B64" | base64 --decode > "$RUNNER_TEMP/lista-nomade-signing/release.jks"
+          test -s "$RUNNER_TEMP/lista-nomade-signing/release.jks" || { echo "Keystore decodificada está vazia"; exit 1; }
+
+          echo "ANDROID_KEYSTORE_PATH=$RUNNER_TEMP/lista-nomade-signing/release.jks" >> "$GITHUB_ENV"
+          echo "ANDROID_KEYSTORE_PASSWORD=$STORE_PASSWORD" >> "$GITHUB_ENV"
+          echo "ANDROID_KEY_ALIAS=$KEY_ALIAS_VALUE" >> "$GITHUB_ENV"
+          echo "ANDROID_KEY_PASSWORD=$KEY_PASSWORD_VALUE" >> "$GITHUB_ENV"
+
+      - name: Validar keystore
+        shell: bash
+        run: |
+          keytool -list \
+            -keystore "$ANDROID_KEYSTORE_PATH" \
+            -storepass "$ANDROID_KEYSTORE_PASSWORD" \
+            -alias "$ANDROID_KEY_ALIAS" >/dev/null
 
       - name: Validar identidade e versões
         run: python3 scripts/verify_versions.py
 
       - name: Compilar Release assinado
-        env:
-          ANDROID_KEYSTORE_PATH: ${{ runner.temp }}/lista-nomade-signing/release.jks
-          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: gradle clean :app:assembleRelease --no-daemon
 
       - name: Preparar arquivos da Release
