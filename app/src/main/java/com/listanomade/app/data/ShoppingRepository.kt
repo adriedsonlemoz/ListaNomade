@@ -2,6 +2,7 @@ package com.listanomade.app.data
 
 import android.content.ContentValues
 import android.content.Context
+import android.database.Cursor
 import android.database.sqlite.SQLiteConstraintException
 import com.listanomade.app.model.Category
 import com.listanomade.app.model.CategoryList
@@ -27,17 +28,9 @@ class ShoppingRepository(context: Context) {
         }
 
         val itemsByCategory = mutableMapOf<Long, MutableList<ShoppingItem>>()
-        db.query(
-            "items",
-            arrayOf("id", "category_id", "name", "unit_price_cents", "quantity", "total_cents", "purchased", "sort_order"),
-            null, null, null, null,
-            "category_id, sort_order, created_at"
-        ).use { c ->
+        db.query("items", ITEM_COLUMNS, null, null, null, null, "category_id, sort_order, created_at").use { c ->
             while (c.moveToNext()) {
-                val item = ShoppingItem(
-                    c.getLong(0), c.getLong(1), c.getString(2), c.getLong(3),
-                    c.getInt(4), c.getLong(5), c.getInt(6) == 1, c.getInt(7)
-                )
+                val item = itemFromCursor(c)
                 itemsByCategory.getOrPut(item.categoryId) { mutableListOf() }.add(item)
             }
         }
@@ -48,13 +41,8 @@ class ShoppingRepository(context: Context) {
 
     fun getItem(id: Long): ShoppingItem? {
         dbHelper.readableDatabase.query(
-            "items",
-            arrayOf("id", "category_id", "name", "unit_price_cents", "quantity", "total_cents", "purchased", "sort_order"),
-            "id = ?", arrayOf(id.toString()), null, null, null, "1"
-        ).use { c ->
-            if (!c.moveToFirst()) return null
-            return ShoppingItem(c.getLong(0), c.getLong(1), c.getString(2), c.getLong(3), c.getInt(4), c.getLong(5), c.getInt(6) == 1, c.getInt(7))
-        }
+            "items", ITEM_COLUMNS, "id = ?", arrayOf(id.toString()), null, null, null, "1"
+        ).use { c -> return if (c.moveToFirst()) itemFromCursor(c) else null }
     }
 
     fun addCategory(name: String): Boolean = try {
@@ -89,29 +77,68 @@ class ShoppingRepository(context: Context) {
         dbHelper.writableDatabase.delete("categories", "id = ?", arrayOf(id.toString()))
     }
 
-    fun saveItem(itemId: Long?, categoryId: Long, name: String, unitPriceCents: Long, quantity: Int): Long {
-        val total = unitPriceCents * quantity
+    fun saveItem(
+        itemId: Long?,
+        categoryId: Long,
+        name: String,
+        unitPriceCents: Long,
+        quantity: Int,
+        purchased: Boolean,
+        owned: Boolean,
+        priority: String,
+        actualUnitPriceCents: Long,
+        store: String,
+        productUrl: String
+    ): Long {
         val values = ContentValues().apply {
             put("category_id", categoryId)
             put("name", name.trim())
-            put("unit_price_cents", unitPriceCents)
+            put("unit_price_cents", unitPriceCents.coerceAtLeast(0L))
             put("quantity", quantity)
-            put("total_cents", total)
+            put("total_cents", unitPriceCents.coerceAtLeast(0L) * quantity)
+            put("purchased", if (purchased && !owned) 1 else 0)
+            put("owned", if (owned) 1 else 0)
+            put("priority", sanitizePriority(priority))
+            put("actual_unit_price_cents", if (purchased && !owned) actualUnitPriceCents.coerceAtLeast(0L) else 0L)
+            put("store", store.trim())
+            put("product_url", productUrl.trim())
             if (itemId == null) {
                 put("created_at", System.currentTimeMillis())
                 put("sort_order", nextItemSortOrder(categoryId))
             }
         }
         val db = dbHelper.writableDatabase
-        return if (itemId == null) db.insertOrThrow("items", null, values)
-        else {
+        return if (itemId == null) db.insertOrThrow("items", null, values) else {
             db.update("items", values, "id = ?", arrayOf(itemId.toString()))
             itemId
         }
     }
 
     fun setPurchased(id: Long, purchased: Boolean) {
-        val values = ContentValues().apply { put("purchased", if (purchased) 1 else 0) }
+        val values = ContentValues().apply {
+            put("purchased", if (purchased) 1 else 0)
+            if (purchased) put("owned", 0)
+        }
+        dbHelper.writableDatabase.update("items", values, "id = ?", arrayOf(id.toString()))
+    }
+
+    fun setOwned(id: Long, owned: Boolean) {
+        val values = ContentValues().apply {
+            put("owned", if (owned) 1 else 0)
+            if (owned) {
+                put("purchased", 0)
+                put("actual_unit_price_cents", 0)
+            }
+        }
+        dbHelper.writableDatabase.update("items", values, "id = ?", arrayOf(id.toString()))
+    }
+
+    fun setPending(id: Long) {
+        val values = ContentValues().apply {
+            put("purchased", 0)
+            put("owned", 0)
+            put("actual_unit_price_cents", 0)
+        }
         dbHelper.writableDatabase.update("items", values, "id = ?", arrayOf(id.toString()))
     }
 
@@ -134,7 +161,7 @@ class ShoppingRepository(context: Context) {
 
     fun duplicateItem(id: Long): Long? {
         val item = getItem(id) ?: return null
-        val values = itemValues(item).apply {
+        val values = itemValues(item.copy(purchased = false, owned = false, actualUnitPriceCents = 0L)).apply {
             put("created_at", System.currentTimeMillis())
             put("sort_order", nextItemSortOrder(item.categoryId))
         }
@@ -159,7 +186,7 @@ class ShoppingRepository(context: Context) {
     }
 
     fun exportDataJson(): JSONObject {
-        val root = JSONObject().put("schema", 2)
+        val root = JSONObject().put("schema", 3)
         val categoriesJson = JSONArray()
         loadAll().forEach { list ->
             val category = list.category
@@ -178,6 +205,11 @@ class ShoppingRepository(context: Context) {
                     .put("quantity", item.quantity)
                     .put("totalCents", item.totalCents)
                     .put("purchased", item.purchased)
+                    .put("owned", item.owned)
+                    .put("priority", item.priority)
+                    .put("actualUnitPriceCents", item.actualUnitPriceCents)
+                    .put("store", item.store)
+                    .put("productUrl", item.productUrl)
                     .put("sortOrder", item.sortOrder))
             }
             categoryJson.put("items", itemsJson)
@@ -204,33 +236,52 @@ class ShoppingRepository(context: Context) {
                 }
                 val categoryId = db.insertOrThrow("categories", null, categoryValues)
                 val items = category.optJSONArray("items") ?: JSONArray()
-                for (j in 0 until items.length()) {
-                    val item = items.getJSONObject(j)
-                    val unit = item.getLong("unitPriceCents")
-                    val quantity = item.getInt("quantity")
-                    val itemValues = ContentValues().apply {
-                        put("id", item.optLong("id", 0L).takeIf { it > 0 })
-                        put("category_id", categoryId)
-                        put("name", item.getString("name"))
-                        put("unit_price_cents", unit)
-                        put("quantity", quantity)
-                        put("total_cents", unit * quantity)
-                        put("purchased", if (item.optBoolean("purchased", false)) 1 else 0)
-                        put("created_at", System.currentTimeMillis() + j)
-                        put("sort_order", item.optInt("sortOrder", j))
-                    }
-                    if (itemValues.getAsLong("id") == 0L) itemValues.remove("id")
-                    db.insertOrThrow("items", null, itemValues)
-                }
+                for (j in 0 until items.length()) insertImportedItem(db, categoryId, items.getJSONObject(j), j)
             }
-            if (categories.length() == 0) {
-                db.execSQL("INSERT INTO categories(name, sort_order) VALUES('Bicicleta', 0)")
-            }
+            if (categories.length() == 0) db.execSQL("INSERT INTO categories(name, sort_order) VALUES('Bicicleta', 0)")
             db.setTransactionSuccessful()
         } finally {
             db.endTransaction()
         }
     }
+
+    private fun insertImportedItem(db: android.database.sqlite.SQLiteDatabase, categoryId: Long, item: JSONObject, order: Int) {
+        val unit = item.optLong("unitPriceCents", 0L).coerceAtLeast(0L)
+        val quantity = item.optInt("quantity", 1).coerceAtLeast(1)
+        val values = ContentValues().apply {
+            item.optLong("id", 0L).takeIf { it > 0 }?.let { put("id", it) }
+            put("category_id", categoryId)
+            put("name", item.getString("name"))
+            put("unit_price_cents", unit)
+            put("quantity", quantity)
+            put("total_cents", unit * quantity)
+            put("purchased", if (item.optBoolean("purchased", false)) 1 else 0)
+            put("owned", if (item.optBoolean("owned", false)) 1 else 0)
+            put("priority", sanitizePriority(item.optString("priority", ShoppingItem.PRIORITY_IMPORTANT)))
+            put("actual_unit_price_cents", item.optLong("actualUnitPriceCents", 0L).coerceAtLeast(0L))
+            put("store", item.optString("store", ""))
+            put("product_url", item.optString("productUrl", ""))
+            put("created_at", System.currentTimeMillis() + order)
+            put("sort_order", item.optInt("sortOrder", order))
+        }
+        db.insertOrThrow("items", null, values)
+    }
+
+    private fun itemFromCursor(c: Cursor) = ShoppingItem(
+        id = c.getLong(0),
+        categoryId = c.getLong(1),
+        name = c.getString(2),
+        unitPriceCents = c.getLong(3),
+        quantity = c.getInt(4),
+        totalCents = c.getLong(5),
+        purchased = c.getInt(6) == 1,
+        sortOrder = c.getInt(7),
+        owned = c.getInt(8) == 1,
+        priority = sanitizePriority(c.getString(9)),
+        actualUnitPriceCents = c.getLong(10),
+        store = c.getString(11).orEmpty(),
+        productUrl = c.getString(12).orEmpty()
+    )
 
     private fun itemValues(item: ShoppingItem) = ContentValues().apply {
         put("category_id", item.categoryId)
@@ -240,6 +291,16 @@ class ShoppingRepository(context: Context) {
         put("total_cents", item.totalCents)
         put("purchased", if (item.purchased) 1 else 0)
         put("sort_order", item.sortOrder)
+        put("owned", if (item.owned) 1 else 0)
+        put("priority", sanitizePriority(item.priority))
+        put("actual_unit_price_cents", item.actualUnitPriceCents)
+        put("store", item.store)
+        put("product_url", item.productUrl)
+    }
+
+    private fun sanitizePriority(value: String): String = when (value) {
+        ShoppingItem.PRIORITY_ESSENTIAL, ShoppingItem.PRIORITY_OPTIONAL -> value
+        else -> ShoppingItem.PRIORITY_IMPORTANT
     }
 
     private fun swapSort(table: String, id1: Long, order1: Int, id2: Long, order2: Int) {
@@ -255,7 +316,6 @@ class ShoppingRepository(context: Context) {
     }
 
     private fun nextCategorySortOrder(): Int = scalarInt("SELECT COALESCE(MAX(sort_order), -1) + 1 FROM categories")
-
     private fun nextItemSortOrder(categoryId: Long): Int = scalarInt(
         "SELECT COALESCE(MAX(sort_order), -1) + 1 FROM items WHERE category_id = ?",
         arrayOf(categoryId.toString())
@@ -263,5 +323,12 @@ class ShoppingRepository(context: Context) {
 
     private fun scalarInt(sql: String, args: Array<String>? = null): Int {
         dbHelper.readableDatabase.rawQuery(sql, args).use { c -> return if (c.moveToFirst()) c.getInt(0) else 0 }
+    }
+
+    companion object {
+        private val ITEM_COLUMNS = arrayOf(
+            "id", "category_id", "name", "unit_price_cents", "quantity", "total_cents", "purchased", "sort_order",
+            "owned", "priority", "actual_unit_price_cents", "store", "product_url"
+        )
     }
 }

@@ -8,6 +8,7 @@
     <color name="accent">#176B62</color>
     <color name="accent_soft">#DCEFEB</color>
     <color name="status_pending">#9A5B00</color>
+    <color name="status_owned">#176B62</color>
     <color name="status_purchased">#146B47</color>
     <color name="danger">#A9231A</color>
     <color name="divider">#D6DDE4</color>

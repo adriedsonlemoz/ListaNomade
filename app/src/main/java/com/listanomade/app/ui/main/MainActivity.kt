@@ -2,6 +2,7 @@ package com.listanomade.app.ui.main
 
 import android.app.Dialog
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -43,6 +44,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var textGeneralTotal: TextView
     private lateinit var textPendingTotal: TextView
     private lateinit var textPurchasedTotal: TextView
+    private lateinit var textGlobalBudget: TextView
     private lateinit var inputSearch: EditText
     private lateinit var buttonFilter: Button
     private lateinit var buttonSort: Button
@@ -79,6 +81,7 @@ class MainActivity : AppCompatActivity() {
         textGeneralTotal = findViewById(R.id.textGeneralTotal)
         textPendingTotal = findViewById(R.id.textPendingTotal)
         textPurchasedTotal = findViewById(R.id.textPurchasedTotal)
+        textGlobalBudget = findViewById(R.id.textGlobalBudget)
         inputSearch = findViewById(R.id.inputSearch)
         buttonFilter = findViewById(R.id.buttonFilter)
         buttonSort = findViewById(R.id.buttonSort)
@@ -91,7 +94,7 @@ class MainActivity : AppCompatActivity() {
             onAddItem = ::openNewItem,
             onMore = ::showCategoryMenu,
             onToggleCollapsed = ::toggleCategory,
-            onPurchasedChanged = ::updatePurchased,
+            onResolvedChanged = ::updateResolved,
             onItemMore = ::showItemMenu
         )
         findViewById<RecyclerView>(R.id.recyclerCategories).apply {
@@ -104,6 +107,7 @@ class MainActivity : AppCompatActivity() {
         findViewById<ImageButton>(R.id.buttonSettings).setOnClickListener { startActivity(Intent(this, SettingsActivity::class.java)) }
         findViewById<Button>(R.id.buttonAddCategory).setOnClickListener { showCategoryDialog(null) }
         findViewById<Button>(R.id.buttonAddItem).setOnClickListener { openNewItem(null) }
+        findViewById<Button>(R.id.buttonGlobalBudget).setOnClickListener { showGlobalBudgetDialog() }
         findViewById<Button>(R.id.buttonUndo).setOnClickListener { undoDelete() }
         buttonFilter.setOnClickListener { showFilterMenu(it) }
         buttonSort.setOnClickListener { showSortMenu(it) }
@@ -126,9 +130,27 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun renderTotals() {
-        textGeneralTotal.text = MoneyFormatter.format(sourceData.sumOf { it.totalCents })
+        val total = sourceData.sumOf { it.totalCents }
+        textGeneralTotal.text = MoneyFormatter.format(total)
         textPendingTotal.text = MoneyFormatter.format(sourceData.sumOf { it.pendingCents })
         textPurchasedTotal.text = MoneyFormatter.format(sourceData.sumOf { it.purchasedCents })
+        renderGlobalBudget(total)
+    }
+
+    private fun renderGlobalBudget(total: Long) {
+        val budget = settings.globalBudgetCents
+        if (budget <= 0L) {
+            textGlobalBudget.setText(R.string.global_budget_not_set)
+            textGlobalBudget.setTextColor(getColor(R.color.text_secondary))
+            return
+        }
+        val delta = budget - total
+        textGlobalBudget.text = if (delta >= 0L) {
+            getString(R.string.budget_remaining, MoneyFormatter.format(budget), MoneyFormatter.format(delta))
+        } else {
+            getString(R.string.budget_over, MoneyFormatter.format(budget), MoneyFormatter.format(-delta))
+        }
+        textGlobalBudget.setTextColor(getColor(if (delta >= 0L) R.color.status_purchased else R.color.danger))
     }
 
     private fun renderVisibleData() {
@@ -138,10 +160,11 @@ class MainActivity : AppCompatActivity() {
         val activeFilter = query.isNotBlank() || filter != SettingsStore.FILTER_ALL
         val data = sourceData.mapNotNull { list ->
             val filtered = list.items.filter { item ->
-                val textOk = query.isBlank() || item.name.lowercase(Locale.getDefault()).contains(query)
+                val textOk = query.isBlank() || listOf(item.name, item.store).any { it.lowercase(Locale.getDefault()).contains(query) }
                 val stateOk = when (filter) {
-                    SettingsStore.FILTER_PENDING -> !item.purchased
+                    SettingsStore.FILTER_PENDING -> item.pending
                     SettingsStore.FILTER_PURCHASED -> item.purchased
+                    SettingsStore.FILTER_OWNED -> item.owned
                     else -> true
                 }
                 textOk && stateOk
@@ -154,16 +177,24 @@ class MainActivity : AppCompatActivity() {
 
     private fun sortItems(items: List<ShoppingItem>, mode: String): List<ShoppingItem> = when (mode) {
         SettingsStore.SORT_NAME -> items.sortedBy { it.name.lowercase(Locale.getDefault()) }
-        SettingsStore.SORT_PRICE_DESC -> items.sortedByDescending { it.totalCents }
-        SettingsStore.SORT_PRICE_ASC -> items.sortedBy { it.totalCents }
-        SettingsStore.SORT_PENDING_FIRST -> items.sortedWith(compareBy<ShoppingItem> { it.purchased }.thenBy { it.sortOrder })
+        SettingsStore.SORT_PRICE_DESC -> items.sortedByDescending { it.effectiveCostCents }
+        SettingsStore.SORT_PRICE_ASC -> items.sortedBy { it.effectiveCostCents }
+        SettingsStore.SORT_PENDING_FIRST -> items.sortedWith(compareBy<ShoppingItem> { !it.pending }.thenBy { it.sortOrder })
+        SettingsStore.SORT_PRIORITY -> items.sortedWith(compareBy<ShoppingItem> { priorityRank(it.priority) }.thenBy { it.sortOrder })
         else -> items.sortedBy { it.sortOrder }
+    }
+
+    private fun priorityRank(priority: String): Int = when (priority) {
+        ShoppingItem.PRIORITY_ESSENTIAL -> 0
+        ShoppingItem.PRIORITY_OPTIONAL -> 2
+        else -> 1
     }
 
     private fun updateFilterButtons() {
         buttonFilter.setText(when (settings.itemFilter) {
             SettingsStore.FILTER_PENDING -> R.string.filter_pending
             SettingsStore.FILTER_PURCHASED -> R.string.filter_purchased
+            SettingsStore.FILTER_OWNED -> R.string.filter_owned
             else -> R.string.filter_all
         })
         buttonSort.setText(when (settings.itemSort) {
@@ -171,19 +202,20 @@ class MainActivity : AppCompatActivity() {
             SettingsStore.SORT_PRICE_DESC -> R.string.sort_price_desc
             SettingsStore.SORT_PRICE_ASC -> R.string.sort_price_asc
             SettingsStore.SORT_PENDING_FIRST -> R.string.sort_pending_first
+            SettingsStore.SORT_PRIORITY -> R.string.sort_priority
             else -> R.string.sort_custom
         })
     }
 
     private fun showFilterMenu(anchor: View) {
         PopupMenu(this, anchor).apply {
-            menu.add(getString(R.string.filter_all))
-            menu.add(getString(R.string.filter_pending))
-            menu.add(getString(R.string.filter_purchased))
+            listOf(R.string.filter_all, R.string.filter_pending, R.string.filter_purchased, R.string.filter_owned)
+                .forEach { menu.add(getString(it)) }
             setOnMenuItemClickListener {
                 settings.itemFilter = when (it.title.toString()) {
                     getString(R.string.filter_pending) -> SettingsStore.FILTER_PENDING
                     getString(R.string.filter_purchased) -> SettingsStore.FILTER_PURCHASED
+                    getString(R.string.filter_owned) -> SettingsStore.FILTER_OWNED
                     else -> SettingsStore.FILTER_ALL
                 }
                 renderVisibleData(); true
@@ -194,10 +226,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun showSortMenu(anchor: View) {
         PopupMenu(this, anchor).apply {
-            listOf(R.string.sort_custom, R.string.sort_name, R.string.sort_price_desc, R.string.sort_price_asc, R.string.sort_pending_first)
+            listOf(R.string.sort_custom, R.string.sort_priority, R.string.sort_name, R.string.sort_price_desc, R.string.sort_price_asc, R.string.sort_pending_first)
                 .forEach { menu.add(getString(it)) }
             setOnMenuItemClickListener {
                 settings.itemSort = when (it.title.toString()) {
+                    getString(R.string.sort_priority) -> SettingsStore.SORT_PRIORITY
                     getString(R.string.sort_name) -> SettingsStore.SORT_NAME
                     getString(R.string.sort_price_desc) -> SettingsStore.SORT_PRICE_DESC
                     getString(R.string.sort_price_asc) -> SettingsStore.SORT_PRICE_ASC
@@ -220,15 +253,24 @@ class MainActivity : AppCompatActivity() {
         startActivity(Intent(this, AddItemActivity::class.java).putExtra(AddItemActivity.EXTRA_ITEM_ID, item.id))
     }
 
-    private fun updatePurchased(item: ShoppingItem, purchased: Boolean) = runAndReload { repository.setPurchased(item.id, purchased) }
+    private fun updateResolved(item: ShoppingItem, resolved: Boolean) = runAndReload {
+        if (resolved) repository.setPurchased(item.id, true) else repository.setPending(item.id)
+    }
+
     private fun toggleCategory(id: Long, collapsed: Boolean) = runAndReload { repository.setCategoryCollapsed(id, collapsed) }
 
     private fun showItemMenu(anchor: View, item: ShoppingItem) {
         PopupMenu(this, anchor).apply {
-            listOf(R.string.edit, R.string.duplicate_item, R.string.move_up, R.string.move_down, R.string.delete).forEach { menu.add(getString(it)) }
+            menu.add(getString(R.string.edit))
+            menu.add(getString(if (item.owned) R.string.mark_pending else R.string.mark_owned))
+            if (item.productUrl.isNotBlank()) menu.add(getString(R.string.open_product))
+            listOf(R.string.duplicate_item, R.string.move_up, R.string.move_down, R.string.delete).forEach { menu.add(getString(it)) }
             setOnMenuItemClickListener {
                 when (it.title.toString()) {
                     getString(R.string.edit) -> openEditItem(item)
+                    getString(R.string.mark_owned) -> runAndReload { repository.setOwned(item.id, true) }
+                    getString(R.string.mark_pending) -> runAndReload { repository.setPending(item.id) }
+                    getString(R.string.open_product) -> openProduct(item.productUrl)
                     getString(R.string.duplicate_item) -> runAndReload { repository.duplicateItem(item.id) }
                     getString(R.string.move_up) -> runAndReload { repository.moveItem(item.id, -1) }
                     getString(R.string.move_down) -> runAndReload { repository.moveItem(item.id, 1) }
@@ -238,6 +280,12 @@ class MainActivity : AppCompatActivity() {
             }
             show()
         }
+    }
+
+    private fun openProduct(rawUrl: String) {
+        val normalized = if (rawUrl.contains("://")) rawUrl else "https://$rawUrl"
+        runCatching { startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(normalized))) }
+            .onFailure { Toast.makeText(this, R.string.invalid_product_link, Toast.LENGTH_SHORT).show() }
     }
 
     private fun deleteItemWithUndo(item: ShoppingItem) {
@@ -273,7 +321,7 @@ class MainActivity : AppCompatActivity() {
                 .forEach { menu.add(getString(it)) }
             setOnMenuItemClickListener {
                 when (it.title.toString()) {
-                    getString(R.string.category_budget) -> showBudgetDialog(list)
+                    getString(R.string.category_budget) -> showCategoryBudgetDialog(list)
                     getString(R.string.rename_category) -> showCategoryDialog(list)
                     getString(R.string.move_up) -> runAndReload { repository.moveCategory(list.category.id, -1) }
                     getString(R.string.move_down) -> runAndReload { repository.moveCategory(list.category.id, 1) }
@@ -285,22 +333,32 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun showBudgetDialog(list: CategoryList) {
+    private fun showCategoryBudgetDialog(list: CategoryList) = showBudgetDialog(
+        R.string.category_budget, R.string.category_budget_hint, list.category.budgetCents,
+        onRemove = { runAndReload { repository.setCategoryBudget(list.category.id, 0L) } },
+        onSave = { cents -> runAndReload { repository.setCategoryBudget(list.category.id, cents) } }
+    )
+
+    private fun showGlobalBudgetDialog() = showBudgetDialog(
+        R.string.global_budget, R.string.global_budget_hint, settings.globalBudgetCents,
+        onRemove = { settings.globalBudgetCents = 0L; renderTotals() },
+        onSave = { cents -> settings.globalBudgetCents = cents; renderTotals() }
+    )
+
+    private fun showBudgetDialog(titleRes: Int, hintRes: Int, current: Long, onRemove: () -> Unit, onSave: (Long) -> Unit) {
         val dialog = Dialog(this)
         dialog.setContentView(R.layout.dialog_budget)
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.findViewById<TextView>(R.id.textBudgetTitle).setText(titleRes)
+        dialog.findViewById<TextView>(R.id.textBudgetHint).setText(hintRes)
         val input = dialog.findViewById<EditText>(R.id.inputBudget)
-        var cents = list.category.budgetCents
+        var cents = current
         val formatter = CurrencyInputFormatter(input) { cents = it }
         input.addTextChangedListener(formatter)
         formatter.setCents(cents)
         dialog.findViewById<Button>(R.id.buttonBudgetCancel).setOnClickListener { dialog.dismiss() }
-        dialog.findViewById<Button>(R.id.buttonBudgetRemove).setOnClickListener {
-            dialog.dismiss(); runAndReload { repository.setCategoryBudget(list.category.id, 0L) }
-        }
-        dialog.findViewById<Button>(R.id.buttonBudgetSave).setOnClickListener {
-            dialog.dismiss(); runAndReload { repository.setCategoryBudget(list.category.id, cents) }
-        }
+        dialog.findViewById<Button>(R.id.buttonBudgetRemove).setOnClickListener { dialog.dismiss(); onRemove() }
+        dialog.findViewById<Button>(R.id.buttonBudgetSave).setOnClickListener { dialog.dismiss(); onSave(cents) }
         dialog.setOnShowListener { resizeDialog(dialog); input.requestFocus() }
         dialog.show()
     }

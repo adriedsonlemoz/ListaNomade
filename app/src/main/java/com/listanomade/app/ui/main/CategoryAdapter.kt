@@ -18,7 +18,7 @@ class CategoryAdapter(
     private val onAddItem: (Long) -> Unit,
     private val onMore: (View, CategoryList) -> Unit,
     private val onToggleCollapsed: (Long, Boolean) -> Unit,
-    private val onPurchasedChanged: (ShoppingItem, Boolean) -> Unit,
+    private val onResolvedChanged: (ShoppingItem, Boolean) -> Unit,
     private val onItemMore: (View, ShoppingItem) -> Unit
 ) : RecyclerView.Adapter<CategoryAdapter.CategoryViewHolder>() {
 
@@ -49,7 +49,7 @@ class CategoryAdapter(
         private val recycler: RecyclerView = view.findViewById(R.id.recyclerItems)
         private val divider: View = view.findViewById(R.id.categoryDivider)
         private val footer: View = view.findViewById(R.id.categoryFooter)
-        private val itemAdapter = ItemAdapter(onPurchasedChanged, onItemMore)
+        private val itemAdapter = ItemAdapter(onResolvedChanged, onItemMore)
 
         init {
             recycler.layoutManager = LinearLayoutManager(itemView.context)
@@ -63,7 +63,7 @@ class CategoryAdapter(
             status.text = context.getString(
                 R.string.category_summary,
                 list.items.size,
-                list.purchasedCount,
+                list.resolvedCount,
                 MoneyFormatter.format(list.pendingCents)
             )
             bindBudget(list)

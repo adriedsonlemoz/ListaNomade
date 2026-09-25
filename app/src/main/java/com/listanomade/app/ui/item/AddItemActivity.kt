@@ -6,6 +6,7 @@ import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
@@ -30,15 +31,25 @@ class AddItemActivity : AppCompatActivity() {
     private lateinit var repository: ShoppingRepository
     private lateinit var inputName: EditText
     private lateinit var inputPrice: EditText
+    private lateinit var inputPaidPrice: EditText
     private lateinit var inputQuantity: EditText
+    private lateinit var inputStore: EditText
+    private lateinit var inputProductUrl: EditText
     private lateinit var spinnerCategory: Spinner
+    private lateinit var spinnerStatus: Spinner
+    private lateinit var spinnerPriority: Spinner
     private lateinit var textTotal: TextView
+    private lateinit var textPaidTotal: TextView
+    private lateinit var containerPaidPrice: View
+    private lateinit var containerPaidTotal: View
     private lateinit var buttonSave: Button
     private lateinit var buttonSaveAnother: Button
     private lateinit var priceFormatter: CurrencyInputFormatter
+    private lateinit var paidPriceFormatter: CurrencyInputFormatter
     private var categories: List<Category> = emptyList()
     private var editingItem: ShoppingItem? = null
     private var currentPriceCents = 0L
+    private var currentPaidPriceCents = 0L
 
     override fun onCreate(savedInstanceState: Bundle?) {
         ThemeManager.applySavedTheme(this)
@@ -47,6 +58,7 @@ class AddItemActivity : AppCompatActivity() {
         SystemBarInsets.apply(findViewById(R.id.rootAddItem))
         repository = ShoppingRepository(this)
         bindViews()
+        configureSpinners()
         configureActions()
         loadData()
     }
@@ -59,9 +71,17 @@ class AddItemActivity : AppCompatActivity() {
     private fun bindViews() {
         inputName = findViewById(R.id.inputName)
         inputPrice = findViewById(R.id.inputPrice)
+        inputPaidPrice = findViewById(R.id.inputPaidPrice)
         inputQuantity = findViewById(R.id.inputQuantity)
+        inputStore = findViewById(R.id.inputStore)
+        inputProductUrl = findViewById(R.id.inputProductUrl)
         spinnerCategory = findViewById(R.id.spinnerCategory)
+        spinnerStatus = findViewById(R.id.spinnerStatus)
+        spinnerPriority = findViewById(R.id.spinnerPriority)
         textTotal = findViewById(R.id.textCalculatedTotal)
+        textPaidTotal = findViewById(R.id.textCalculatedPaidTotal)
+        containerPaidPrice = findViewById(R.id.containerPaidPrice)
+        containerPaidTotal = findViewById(R.id.containerPaidTotal)
         buttonSave = findViewById(R.id.buttonSave)
         buttonSaveAnother = findViewById(R.id.buttonSaveAnother)
         buttonSave.isEnabled = false
@@ -71,13 +91,36 @@ class AddItemActivity : AppCompatActivity() {
         )
     }
 
+    private fun configureSpinners() {
+        spinnerStatus.adapter = simpleSpinner(listOf(
+            getString(R.string.not_purchased), getString(R.string.purchased), getString(R.string.already_have)
+        ))
+        spinnerPriority.adapter = simpleSpinner(listOf(
+            getString(R.string.priority_essential), getString(R.string.priority_important), getString(R.string.priority_optional)
+        ))
+        spinnerStatus.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) = updatePaidVisibility()
+            override fun onNothingSelected(parent: AdapterView<*>?) = Unit
+        }
+    }
+
+    private fun simpleSpinner(values: List<String>) =
+        ArrayAdapter(this, android.R.layout.simple_spinner_item, values).also {
+            it.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        }
+
     private fun configureActions() {
         findViewById<ImageButton>(R.id.buttonBack).setOnClickListener { finish() }
         priceFormatter = CurrencyInputFormatter(inputPrice) { cents ->
             currentPriceCents = cents
             updateCalculatedTotal()
         }
+        paidPriceFormatter = CurrencyInputFormatter(inputPaidPrice) { cents ->
+            currentPaidPriceCents = cents
+            updateCalculatedTotal()
+        }
         inputPrice.addTextChangedListener(priceFormatter)
+        inputPaidPrice.addTextChangedListener(paidPriceFormatter)
         inputQuantity.addTextChangedListener(simpleWatcher { updateCalculatedTotal() })
         buttonSave.setOnClickListener { validateAndSave(false) }
         buttonSaveAnother.setOnClickListener { validateAndSave(true) }
@@ -95,16 +138,30 @@ class AddItemActivity : AppCompatActivity() {
     private fun populate(loadedCategories: List<Category>, item: ShoppingItem?) {
         categories = loadedCategories
         editingItem = item
-        spinnerCategory.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, categories.map { it.name }).also {
-            it.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        }
+        spinnerCategory.adapter = simpleSpinner(categories.map { it.name })
         val preferredCategoryId = item?.categoryId ?: intent.getLongExtra(EXTRA_CATEGORY_ID, -1L).takeIf { it > 0 }
         val index = categories.indexOfFirst { it.id == preferredCategoryId }.takeIf { it >= 0 } ?: 0
         if (categories.isNotEmpty()) spinnerCategory.setSelection(index)
 
         inputQuantity.setText((item?.quantity ?: 1).toString())
         priceFormatter.setCents(item?.unitPriceCents ?: 0L)
-        item?.let { inputName.setText(it.name) }
+        paidPriceFormatter.setCents(item?.actualUnitPriceCents ?: 0L)
+        inputName.setText(item?.name.orEmpty())
+        inputStore.setText(item?.store.orEmpty())
+        inputProductUrl.setText(item?.productUrl.orEmpty())
+        spinnerStatus.setSelection(when {
+            item?.owned == true -> STATUS_OWNED
+            item?.purchased == true -> STATUS_PURCHASED
+            else -> STATUS_PENDING
+        })
+        spinnerPriority.setSelection(when (item?.priority) {
+            ShoppingItem.PRIORITY_ESSENTIAL -> 0
+            ShoppingItem.PRIORITY_OPTIONAL -> 2
+            else -> 1
+        })
+        updatePaidVisibility()
+        updateCalculatedTotal()
+
         val enabled = categories.isNotEmpty()
         buttonSave.isEnabled = enabled
         buttonSaveAnother.isEnabled = enabled
@@ -112,9 +169,18 @@ class AddItemActivity : AppCompatActivity() {
         inputName.requestFocus()
     }
 
+    private fun updatePaidVisibility() {
+        val purchased = spinnerStatus.selectedItemPosition == STATUS_PURCHASED
+        containerPaidPrice.visibility = if (purchased) View.VISIBLE else View.GONE
+        containerPaidTotal.visibility = if (purchased) View.VISIBLE else View.GONE
+        updateCalculatedTotal()
+    }
+
     private fun updateCalculatedTotal() {
         val quantity = inputQuantity.text?.toString()?.toIntOrNull()?.coerceAtLeast(0) ?: 0
         textTotal.text = MoneyFormatter.format(currentPriceCents * quantity)
+        val paidUnit = currentPaidPriceCents.takeIf { it > 0L } ?: currentPriceCents
+        textPaidTotal.text = MoneyFormatter.format(paidUnit * quantity)
     }
 
     private fun validateAndSave(addAnother: Boolean) {
@@ -125,16 +191,30 @@ class AddItemActivity : AppCompatActivity() {
             currentPriceCents < 0L -> inputPrice.error = getString(R.string.invalid_price)
             quantity == null || quantity <= 0 -> inputQuantity.error = getString(R.string.invalid_quantity)
             categories.isEmpty() -> return
-            else -> save(name, currentPriceCents, quantity, addAnother)
+            else -> save(name, quantity, addAnother)
         }
     }
 
-    private fun save(name: String, price: Long, quantity: Int, addAnother: Boolean) {
+    private fun save(name: String, quantity: Int, addAnother: Boolean) {
         buttonSave.isEnabled = false
         buttonSaveAnother.isEnabled = false
         val categoryId = categories[spinnerCategory.selectedItemPosition].id
+        val status = spinnerStatus.selectedItemPosition
+        val priority = when (spinnerPriority.selectedItemPosition) {
+            0 -> ShoppingItem.PRIORITY_ESSENTIAL
+            2 -> ShoppingItem.PRIORITY_OPTIONAL
+            else -> ShoppingItem.PRIORITY_IMPORTANT
+        }
         worker.execute {
-            repository.saveItem(editingItem?.id, categoryId, name, price, quantity)
+            repository.saveItem(
+                editingItem?.id, categoryId, name, currentPriceCents, quantity,
+                purchased = status == STATUS_PURCHASED,
+                owned = status == STATUS_OWNED,
+                priority = priority,
+                actualUnitPriceCents = currentPaidPriceCents,
+                store = inputStore.text.toString(),
+                productUrl = inputProductUrl.text.toString()
+            )
             mainHandler.post {
                 Toast.makeText(this, R.string.item_saved, Toast.LENGTH_SHORT).show()
                 if (addAnother && editingItem == null) resetForNextItem() else finish()
@@ -145,7 +225,12 @@ class AddItemActivity : AppCompatActivity() {
     private fun resetForNextItem() {
         inputName.text.clear()
         inputQuantity.setText("1")
+        inputStore.text.clear()
+        inputProductUrl.text.clear()
         priceFormatter.setCents(0L)
+        paidPriceFormatter.setCents(0L)
+        spinnerStatus.setSelection(STATUS_PENDING)
+        spinnerPriority.setSelection(1)
         buttonSave.isEnabled = true
         buttonSaveAnother.isEnabled = true
         inputName.requestFocus()
@@ -160,5 +245,8 @@ class AddItemActivity : AppCompatActivity() {
     companion object {
         const val EXTRA_ITEM_ID = "item_id"
         const val EXTRA_CATEGORY_ID = "category_id"
+        private const val STATUS_PENDING = 0
+        private const val STATUS_PURCHASED = 1
+        private const val STATUS_OWNED = 2
     }
 }

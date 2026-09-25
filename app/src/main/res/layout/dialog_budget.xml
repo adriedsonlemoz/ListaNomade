@@ -7,6 +7,7 @@
     android:padding="20dp">
 
     <TextView
+        android:id="@+id/textBudgetTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/category_budget"
@@ -15,6 +16,7 @@
         android:textStyle="bold" />
 
     <TextView
+        android:id="@+id/textBudgetHint"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"

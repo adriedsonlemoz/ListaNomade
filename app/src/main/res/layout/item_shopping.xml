@@ -6,7 +6,7 @@
     android:layout_marginBottom="6dp"
     android:background="@drawable/bg_item"
     android:gravity="center_vertical"
-    android:minHeight="66dp"
+    android:minHeight="70dp"
     android:orientation="horizontal"
     android:paddingStart="8dp"
     android:paddingTop="8dp"
@@ -53,13 +53,7 @@
                 android:textColor="@color/text_secondary"
                 android:textSize="12sp" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="6dp"
-                android:text="•"
-                android:textColor="@color/text_secondary"
-                android:textSize="11sp" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="6dp" android:text="•" android:textColor="@color/text_secondary" android:textSize="11sp" />
 
             <TextView
                 android:id="@+id/textItemState"
@@ -69,6 +63,16 @@
                 android:textSize="11sp"
                 android:textStyle="bold" />
         </LinearLayout>
+
+        <TextView
+            android:id="@+id/textItemExtra"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:textColor="@color/text_secondary"
+            android:textSize="11sp" />
     </LinearLayout>
 
     <TextView

@@ -2,7 +2,7 @@
   "product": "lista-nomade",
   "name": "lista_nomade",
   "displayName": "Lista Nômade",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "packageFormat": 2,
   "projectType": "android-native",
   "framework": "Android SDK + XML",
@@ -10,8 +10,8 @@
   "platform": "Android",
   "android": {
     "applicationId": "com.listanomade.app",
-    "versionName": "1.0.4",
-    "versionCode": 5,
+    "versionName": "1.0.5",
+    "versionCode": 6,
     "compileSdk": 35,
     "targetSdk": 35,
     "minSdk": 26

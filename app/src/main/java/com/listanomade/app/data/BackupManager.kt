@@ -21,6 +21,7 @@ class BackupManager(context: Context) {
                 .put("darkTheme", settings.darkTheme)
                 .put("itemFilter", settings.itemFilter)
                 .put("itemSort", settings.itemSort)
+                .put("globalBudgetCents", settings.globalBudgetCents)
         )
         return root.toString(2)
     }
@@ -33,6 +34,7 @@ class BackupManager(context: Context) {
             settings.darkTheme = saved.optBoolean("darkTheme", settings.darkTheme)
             settings.itemFilter = saved.optString("itemFilter", SettingsStore.FILTER_ALL)
             settings.itemSort = saved.optString("itemSort", SettingsStore.SORT_CUSTOM)
+            settings.globalBudgetCents = saved.optLong("globalBudgetCents", settings.globalBudgetCents)
         }
     }
 }

@@ -36,6 +36,11 @@ class AppDatabase private constructor(context: Context) :
                 purchased INTEGER NOT NULL DEFAULT 0,
                 created_at INTEGER NOT NULL,
                 sort_order INTEGER NOT NULL DEFAULT 0,
+                owned INTEGER NOT NULL DEFAULT 0,
+                priority TEXT NOT NULL DEFAULT 'important',
+                actual_unit_price_cents INTEGER NOT NULL DEFAULT 0,
+                store TEXT NOT NULL DEFAULT '',
+                product_url TEXT NOT NULL DEFAULT '',
                 FOREIGN KEY(category_id) REFERENCES categories(id) ON DELETE CASCADE
             )
             """.trimIndent()
@@ -51,14 +56,19 @@ class AppDatabase private constructor(context: Context) :
             db.execSQL("ALTER TABLE items ADD COLUMN sort_order INTEGER NOT NULL DEFAULT 0")
             db.execSQL("UPDATE items SET sort_order = id")
         }
-        if (oldVersion < 3) {
-            DefaultCatalog.seedMissing(db)
+        if (oldVersion < 3) DefaultCatalog.seedMissing(db)
+        if (oldVersion < 4) {
+            db.execSQL("ALTER TABLE items ADD COLUMN owned INTEGER NOT NULL DEFAULT 0")
+            db.execSQL("ALTER TABLE items ADD COLUMN priority TEXT NOT NULL DEFAULT 'important'")
+            db.execSQL("ALTER TABLE items ADD COLUMN actual_unit_price_cents INTEGER NOT NULL DEFAULT 0")
+            db.execSQL("ALTER TABLE items ADD COLUMN store TEXT NOT NULL DEFAULT ''")
+            db.execSQL("ALTER TABLE items ADD COLUMN product_url TEXT NOT NULL DEFAULT ''")
         }
     }
 
     companion object {
         private const val DATABASE_NAME = "lista_nomade.db"
-        private const val DATABASE_VERSION = 3
+        private const val DATABASE_VERSION = 4
 
         @Volatile private var instance: AppDatabase? = null
 

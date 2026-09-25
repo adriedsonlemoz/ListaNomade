@@ -94,6 +94,37 @@
                 <TextView android:id="@+id/textPurchasedTotal" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="R$ 0,00" android:textColor="@color/status_purchased" android:textSize="15sp" android:textStyle="bold" />
             </LinearLayout>
         </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/textGlobalBudget"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/global_budget_not_set"
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp" />
+
+            <Button
+                android:id="@+id/buttonGlobalBudget"
+                android:layout_width="wrap_content"
+                android:layout_height="34dp"
+                android:background="@drawable/bg_button_secondary"
+                android:minHeight="0dp"
+                android:minWidth="0dp"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:text="@string/global_budget_action"
+                android:textAllCaps="false"
+                android:textColor="@color/accent"
+                android:textSize="12sp" />
+        </LinearLayout>
     </LinearLayout>
 
     <EditText

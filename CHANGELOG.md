@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.0.5] - 2026-09-25
+
+### Adicionado
+- Estado `Já tenho` para itens que já estão em posse do usuário e não devem entrar no valor pendente nem no orçamento de compra.
+- Prioridades `Essencial`, `Importante` e `Opcional`, com exibição nos itens e nova ordenação por prioridade.
+- Orçamento geral para todas as categorias, exibindo saldo restante ou valor acima do limite diretamente na tela principal.
+- Preço previsto e preço pago no mesmo item; compras concluídas passam a usar o valor realmente pago nos totais e mostram economia ou excesso quando houver diferença.
+- Campos opcionais de loja/origem e link do produto, com ação para abrir o anúncio diretamente pelo menu do item.
+
+### Melhorado
+- Filtros agora incluem `Já tenho`; itens resolvidos podem voltar a pendentes pelo checkbox ou menu.
+- Busca também considera o nome da loja, e a duplicação de item limpa estados de compra para criar uma nova pendência.
+- Backup local atualizado para schema 3, incluindo estado `Já tenho`, prioridade, preço pago, loja, link e orçamento geral.
+- Totais por categoria e total geral desconsideram itens `Já tenho`; comprados usam preço pago quando informado e pendentes continuam usando preço previsto.
+
+### Persistência, build e documentação
+- SQLite migrado incrementalmente do schema 3 para o schema 4 sem apagar categorias ou itens existentes.
+- Versão sincronizada como `1.0.5+6` em `gradle.properties`, `github-manager.json`, `app_identity.json`, README, CHANGELOG e tela de informações.
+- Workflow permanece configurado para preparar/publicar somente o APK da Release, sem `source.zip` personalizado.
+
 ## [1.0.4] - 2026-09-25
 
 ### Adicionado
