@@ -1,0 +1,19 @@
+{
+  "product": "lista-nomade",
+  "name": "lista_nomade",
+  "displayName": "Lista Nômade",
+  "version": "1.0.0",
+  "packageFormat": 2,
+  "projectType": "android-native",
+  "framework": "Android SDK + XML",
+  "language": "Kotlin",
+  "platform": "Android",
+  "android": {
+    "applicationId": "com.listanomade.app",
+    "versionName": "1.0.0",
+    "versionCode": 1,
+    "compileSdk": 35,
+    "targetSdk": 35,
+    "minSdk": 26
+  }
+}

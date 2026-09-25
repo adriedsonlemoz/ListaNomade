@@ -1,0 +1,8 @@
+{
+  "product": "Lista Nômade",
+  "applicationId": "com.listanomade.app",
+  "platform": "android",
+  "language": "kotlin",
+  "versionName": "1.0.0",
+  "versionCode": 1
+}

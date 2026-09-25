@@ -1,0 +1,55 @@
+<resources>
+    <string name="app_name">Lista Nômade</string>
+    <string name="settings">Informações e configurações</string>
+    <string name="add_category">Adicionar categoria</string>
+    <string name="general_total">Total geral</string>
+    <string name="pending_total">Pendente: %1$s</string>
+    <string name="add_item">Adicionar item</string>
+    <string name="empty_category">Nenhum item nesta categoria.</string>
+    <string name="category_total">Total da categoria</string>
+    <string name="pending_items">%1$d pendente(s) • %2$d comprado(s)</string>
+    <string name="item_unit_line">%1$d × %2$s</string>
+    <string name="purchased">Comprado</string>
+    <string name="not_purchased">Pendente</string>
+    <string name="edit">Editar</string>
+    <string name="delete">Excluir</string>
+    <string name="more_options">Mais opções</string>
+    <string name="category_name">Nome da categoria</string>
+    <string name="rename_category">Renomear categoria</string>
+    <string name="delete_category">Excluir categoria</string>
+    <string name="cancel">Cancelar</string>
+    <string name="save">Salvar</string>
+    <string name="name">Nome</string>
+    <string name="unit_price">Preço unitário</string>
+    <string name="quantity">Quantidade</string>
+    <string name="category">Categoria</string>
+    <string name="item_total">Valor total</string>
+    <string name="invalid_name">Informe um nome.</string>
+    <string name="invalid_price">Informe um preço válido.</string>
+    <string name="invalid_quantity">Informe uma quantidade maior que zero.</string>
+    <string name="category_exists">Já existe uma categoria com esse nome.</string>
+    <string name="category_added">Categoria adicionada.</string>
+    <string name="category_renamed">Categoria renomeada.</string>
+    <string name="item_saved">Item salvo.</string>
+    <string name="delete_item_question">Excluir “%1$s”?</string>
+    <string name="delete_category_question">Excluir “%1$s” e todos os seus itens?</string>
+    <string name="about_app">Sobre o app</string>
+    <string name="version_format">Versão %1$s (%2$d)</string>
+    <string name="recent_changes_title">3 últimas alterações</string>
+    <string name="theme_title">Tema</string>
+    <string name="dark_theme">Tema escuro</string>
+    <string name="donation">Doação</string>
+    <string name="donation_description">Copiar chave Pix para apoiar o projeto</string>
+    <string name="pix_key">adriedson@outlook.com</string>
+    <string name="pix_copied">Chave Pix copiada.</string>
+    <string name="back">Voltar</string>
+    <string name="edit_item_title">Editar item</string>
+    <string name="add_item_title">Novo item</string>
+    <string name="loading">Carregando…</string>
+
+    <string-array name="recent_changes">
+        <item>Listas independentes por categorias, com total geral e total por categoria.</item>
+        <item>Itens com preço, quantidade, edição, exclusão e status comprado sem remover da lista.</item>
+        <item>Persistência SQLite, tema claro/escuro e integração inicial com GitHub Manager e GitHub Release.</item>
+    </string-array>
+</resources>

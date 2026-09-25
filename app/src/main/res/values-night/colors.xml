@@ -1,0 +1,13 @@
+<resources>
+    <color name="bg">#101417</color>
+    <color name="surface">#171D21</color>
+    <color name="surface_alt">#20282D</color>
+    <color name="text_primary">#EEF4F5</color>
+    <color name="text_secondary">#A7B3BA</color>
+    <color name="accent">#70D1C3</color>
+    <color name="accent_soft">#183C38</color>
+    <color name="danger">#FFB4AB</color>
+    <color name="divider">#303A40</color>
+    <color name="purchased_bg">#18221F</color>
+    <color name="white">#FFFFFF</color>
+</resources>
