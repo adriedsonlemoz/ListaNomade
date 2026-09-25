@@ -5,23 +5,35 @@
     <string name="category_short_action">+ Categoria</string>
     <string name="item_short_action">+ Item</string>
     <string name="general_total">Total geral</string>
-    <string name="pending_total">Pendente: %1$s</string>
+    <string name="pending_short">Pendente</string>
+    <string name="purchased_short">Comprado</string>
     <string name="add_item">Adicionar item</string>
     <string name="empty_category">Nenhum item nesta categoria.</string>
+    <string name="empty_filter">Nenhum item corresponde à busca/filtro.</string>
     <string name="category_total">Total da categoria</string>
-    <string name="pending_items">%1$d pendente(s) • %2$d comprado(s)</string>
+    <string name="category_summary">%1$d itens • %2$d comprados • %3$s pendentes</string>
     <string name="item_unit_line">%1$d × %2$s</string>
     <string name="purchased">Comprado</string>
     <string name="not_purchased">Pendente</string>
     <string name="edit">Editar</string>
     <string name="delete">Excluir</string>
+    <string name="duplicate_item">Duplicar item</string>
+    <string name="move_up">Mover para cima</string>
+    <string name="move_down">Mover para baixo</string>
     <string name="more_options">Mais opções</string>
     <string name="category_name">Nome da categoria</string>
     <string name="category_dialog_hint">Organize os itens em uma lista própria.</string>
     <string name="rename_category">Renomear categoria</string>
     <string name="delete_category">Excluir categoria</string>
+    <string name="collapse_category">Expandir ou recolher categoria</string>
+    <string name="category_budget">Definir orçamento</string>
+    <string name="category_budget_hint">Informe quanto pretende gastar nesta categoria.</string>
+    <string name="remove_budget">Remover</string>
+    <string name="budget_remaining">Orçamento %1$s • Restam %2$s</string>
+    <string name="budget_over">Orçamento %1$s • Acima em %2$s</string>
     <string name="cancel">Cancelar</string>
     <string name="save">Salvar</string>
+    <string name="save_and_add_another">Salvar e adicionar outro</string>
     <string name="name">Nome</string>
     <string name="item_name_hint">Ex.: Câmara de ar</string>
     <string name="unit_price">Preço unitário</string>
@@ -35,13 +47,33 @@
     <string name="category_added">Categoria adicionada.</string>
     <string name="category_renamed">Categoria renomeada.</string>
     <string name="item_saved">Item salvo.</string>
-    <string name="delete_item_question">Excluir “%1$s”?</string>
+    <string name="item_deleted">“%1$s” excluído.</string>
+    <string name="undo">Desfazer</string>
     <string name="delete_category_question">Excluir “%1$s” e todos os seus itens?</string>
+    <string name="search_items">Buscar itens…</string>
+    <string name="filter_all">Todos</string>
+    <string name="filter_pending">Pendentes</string>
+    <string name="filter_purchased">Comprados</string>
+    <string name="sort_custom">Ordem personalizada</string>
+    <string name="sort_name">Nome A–Z</string>
+    <string name="sort_price_desc">Maior valor</string>
+    <string name="sort_price_asc">Menor valor</string>
+    <string name="sort_pending_first">Pendentes primeiro</string>
     <string name="about_app">Sobre o app</string>
     <string name="version_format">Versão %1$s (%2$d)</string>
     <string name="recent_changes_title">3 últimas alterações</string>
     <string name="theme_title">Tema</string>
     <string name="dark_theme">Tema escuro</string>
+    <string name="backup_title">Backup local</string>
+    <string name="backup_description">Exporte listas e configurações para restaurar depois, inclusive em outro aparelho.</string>
+    <string name="export_backup">Exportar</string>
+    <string name="restore_backup">Restaurar</string>
+    <string name="restore">Restaurar</string>
+    <string name="restore_backup_warning">A restauração substituirá as categorias e itens atuais pelos dados do arquivo.</string>
+    <string name="backup_exported">Backup exportado com sucesso.</string>
+    <string name="backup_restored">Backup restaurado com sucesso.</string>
+    <string name="backup_error">Não foi possível exportar o backup.</string>
+    <string name="backup_invalid">Não foi possível restaurar este backup.</string>
     <string name="support_project">Apoiar o projeto</string>
     <string name="donation">Doação</string>
     <string name="donation_description">Copiar a chave Pix para a área de transferência.</string>
@@ -53,8 +85,8 @@
     <string name="loading">Carregando…</string>
 
     <string-array name="recent_changes">
-        <item>Interface compactada e corrigida para respeitar as barras do sistema sem cortar ações.</item>
-        <item>Formulários, diálogos, menus e estados de compra receberam hierarquia visual mais clara.</item>
-        <item>Workflow agora publica somente o APK e não gera mais o source.zip personalizado.</item>
+        <item>Orçamentos por categoria, totais comprado/pendente, busca, filtros, recolhimento e ordenação de listas.</item>
+        <item>Valores monetários agora ganham pontuação brasileira automaticamente; também há duplicação, desfazer e “salvar e adicionar outro”.</item>
+        <item>Backup/restauração local adicionados, com migração segura dos dados existentes e workflow mantido somente com APK.</item>
     </string-array>
 </resources>

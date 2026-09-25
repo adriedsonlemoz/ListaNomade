@@ -1,35 +1,43 @@
 # Lista Nômade
 
-Aplicativo Android nativo para listas de compras por categorias, focado em uso rápido, armazenamento local e baixo consumo.
+Aplicativo Android nativo para organizar compras por categorias, com foco em uso rápido, funcionamento offline, baixo consumo e dados persistidos localmente.
 
-**Versão atual:** 1.0.2+3  
+**Versão atual:** 1.0.3+4  
 **applicationId:** `com.listanomade.app`
 
 ## Funcionalidades
 
 - Categoria inicial `Bicicleta` criada automaticamente no primeiro uso.
-- Categorias independentes com nome, itens, total da categoria e contadores de pendentes/comprados.
-- Total geral e total pendente no topo.
-- Itens com nome, preço unitário, quantidade, total calculado, edição, exclusão e marcação como comprado.
-- Inclusão rápida de itens, com categoria pré-selecionada quando iniciada pelo cartão da lista.
+- Categorias independentes com itens, total, orçamento opcional e resumo de compras.
+- Totais no topo separados em total geral, valor pendente e valor já comprado.
+- Itens com nome, preço unitário, quantidade, total automático e estado comprado/não comprado.
+- Digitação monetária automática em padrão brasileiro: os números digitados são convertidos para `R$ 0,00` sem inserir vírgulas manualmente.
+- Busca instantânea de itens e filtros para todos, pendentes ou comprados.
+- Categorias recolhíveis, mantendo o estado após fechar o aplicativo.
+- Ordenação por ordem personalizada, nome, maior/menor valor ou pendentes primeiro.
+- Reordenação manual de categorias e itens.
+- Edição, duplicação e exclusão com `Desfazer` para itens.
+- Fluxo `Salvar e adicionar outro` para preencher listas grandes com poucos toques.
+- Backup e restauração local em JSON pelo seletor nativo de arquivos do Android.
 - Tema claro/escuro persistente.
-- Tela de informações com versão, 3 últimas alterações e botão de doação que copia a chave Pix.
-- Persistência local por `SQLiteOpenHelper`; preferências por `SharedPreferences`.
-- Valores monetários armazenados em centavos (`Long`), sem erros de ponto flutuante na persistência.
+- Tela de informações com versão, 3 últimas alterações e doação via cópia da chave Pix.
+
+## Persistência
+
+O app utiliza `SQLiteOpenHelper` para listas e `SharedPreferences` para configurações. Valores monetários são armazenados em centavos (`Long`) para evitar erros de ponto flutuante.
+
+A versão 1.0.3 utiliza schema SQLite 2 e possui migração incremental a partir do schema anterior. A atualização preserva categorias e itens já cadastrados e acrescenta orçamento, ordem personalizada e estado recolhido.
+
+O backup exportado contém categorias, itens, preços, quantidades, status de compra, orçamento, ordem e configurações principais. A restauração substitui os dados locais atuais pelo conteúdo do arquivo escolhido.
 
 ## Interface
 
-A versão 1.0.2 reorganiza a interface para uso diário em telas pequenas e recentes:
-
-- conteúdo respeita automaticamente as áreas da barra de status e da navegação do Android;
-- botão inferior `Adicionar item` permanece totalmente visível acima da navegação do sistema;
-- cabeçalho e cartões usam menos espaço vertical;
-- formulário de item combina preço e quantidade na mesma linha e identifica visualmente a seleção de categoria;
-- itens usam um único menu de ações para editar/excluir, reduzindo poluição visual;
-- estados `Pendente` e `Comprado` possuem cores distintas;
-- diálogo de categoria segue a mesma linguagem visual do restante do aplicativo;
-- área de doação foi reduzida para não competir com as configurações principais;
-- contraste de textos secundários e estados desabilitados foi reforçado.
+- Áreas seguras respeitam barras de status e navegação do Android.
+- Cartões e formulários compactos para aproveitar telas pequenas.
+- Categorias podem ser recolhidas sem perder o resumo principal.
+- Busca e filtros ficam disponíveis diretamente na tela inicial.
+- Estados `Pendente` e `Comprado` usam tratamento visual distinto.
+- Cadastro de valor usa teclado numérico e máscara monetária automática.
 
 ## Base técnica
 
@@ -43,15 +51,15 @@ A versão 1.0.2 reorganiza a interface para uso diário em telas pequenas e rece
 
 ## Estrutura
 
-- `model/`: modelos imutáveis.
-- `data/`: SQLite e repositório.
-- `ui/main/`: tela principal e adaptadores.
-- `ui/item/`: inclusão/edição.
-- `ui/settings/`: informações, tema e doação.
-- `util/`: dinheiro, preferências, tema e tratamento das áreas seguras do sistema.
-- `scripts/`: validação de versão e arquitetura.
+- `model/`: modelos das categorias e itens.
+- `data/`: SQLite, repositório e backup/restauração.
+- `ui/main/`: tela principal, filtros e adaptadores.
+- `ui/item/`: inclusão e edição de itens.
+- `ui/settings/`: informações, tema, backup e doação.
+- `util/`: dinheiro, máscara monetária, preferências, tema e áreas seguras.
+- `scripts/`: validações de versão e arquitetura.
 
-Nenhum arquivo Kotlin deve ultrapassar 500 linhas. `scripts/verify_versions.py` valida essa regra e o sincronismo de versão.
+Nenhum arquivo Kotlin pode ultrapassar 500 linhas. `scripts/verify_versions.py` valida essa regra e o sincronismo de versão.
 
 ## Build local
 
@@ -62,21 +70,21 @@ python3 scripts/verify_versions.py
 gradle :app:assembleDebug
 ```
 
-Para Release assinado, defina `ANDROID_KEYSTORE_PATH`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS` e `ANDROID_KEY_PASSWORD` antes do build.
+Para Release assinado, defina `ANDROID_KEYSTORE_PATH`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS` e `ANDROID_KEY_PASSWORD`.
 
-## GitHub Actions
+## GitHub Actions / Works
 
 O workflow `.github/workflows/release.yml`:
 
 1. prepara Java 17 e Android SDK 35;
 2. fixa Gradle 8.10.2;
 3. valida os Secrets da chave permanente;
-4. valida versões e limite de linhas;
-5. compila Release assinado e verifica a assinatura com `apksigner`;
+4. valida versão e limite de linhas;
+5. compila e verifica o APK Release assinado;
 6. cria `Lista-Nomade-v<VERSAO>.apk`;
-7. valida que `dist/` contém somente esse APK;
+7. exige que `dist/` contenha exatamente esse APK;
 8. publica diretamente o APK na GitHub Release.
 
-O workflow **não usa `actions/upload-artifact`** e **não gera mais `Lista-Nomade-v<VERSAO>-source.zip`**. GitHub Releases pode continuar exibindo os arquivos automáticos `Source code (zip)` e `Source code (tar.gz)` gerados pelo próprio GitHub; eles não são artifacts criados pelo workflow do projeto.
+O workflow **não gera `source.zip` personalizado**, **não usa `git archive`** e **não usa `actions/upload-artifact`**. Os links automáticos `Source code (zip)` e `Source code (tar.gz)` exibidos pelo próprio GitHub na página da Release não são arquivos gerados pelo Works/workflow.
 
-Veja `SIGNING.md` para configurar os Secrets.
+Veja `SIGNING.md` para configurar os Secrets de assinatura permanente.

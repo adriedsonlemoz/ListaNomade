@@ -13,7 +13,7 @@
         android:orientation="vertical"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
-        android:paddingBottom="16dp">
+        android:paddingBottom="20dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -32,9 +32,10 @@
 
             <TextView
                 android:id="@+id/textTitle"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="4dp"
+                android:layout_weight="1"
                 android:textColor="@color/text_primary"
                 android:textSize="21sp"
                 android:textStyle="bold" />
@@ -89,24 +90,20 @@
                     android:layout_height="48dp"
                     android:layout_marginTop="5dp"
                     android:background="@drawable/bg_input"
-                    android:hint="0,00"
                     android:imeOptions="actionNext"
-                    android:inputType="numberDecimal"
+                    android:inputType="number"
                     android:maxLines="1"
                     android:paddingStart="14dp"
                     android:paddingEnd="14dp"
-                    android:textColor="@color/text_primary"
-                    android:textColorHint="@color/text_secondary" />
+                    android:textColor="@color/text_primary" />
             </LinearLayout>
 
-            <Space
-                android:layout_width="10dp"
-                android:layout_height="1dp" />
+            <Space android:layout_width="10dp" android:layout_height="1dp" />
 
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="0.72"
+                android:layout_weight="0.65"
                 android:orientation="vertical">
 
                 <TextView
@@ -170,10 +167,7 @@
             android:background="@drawable/bg_accent_card"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:paddingStart="14dp"
-            android:paddingTop="11dp"
-            android:paddingEnd="14dp"
-            android:paddingBottom="11dp">
+            android:padding="14dp">
 
             <TextView
                 android:layout_width="0dp"
@@ -189,7 +183,7 @@
                 android:layout_height="wrap_content"
                 android:text="R$ 0,00"
                 android:textColor="@color/text_primary"
-                android:textSize="22sp"
+                android:textSize="21sp"
                 android:textStyle="bold" />
         </LinearLayout>
 
@@ -203,6 +197,18 @@
             android:textAllCaps="false"
             android:textColor="@color/button_primary_text"
             android:textSize="15sp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/buttonSaveAnother"
+            android:layout_width="match_parent"
+            android:layout_height="46dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/bg_button_secondary"
+            android:text="@string/save_and_add_another"
+            android:textAllCaps="false"
+            android:textColor="@color/accent"
+            android:textSize="14sp"
             android:textStyle="bold" />
     </LinearLayout>
 </ScrollView>

@@ -18,7 +18,9 @@ class AppDatabase private constructor(context: Context) :
             CREATE TABLE categories (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL COLLATE NOCASE UNIQUE,
-                sort_order INTEGER NOT NULL DEFAULT 0
+                sort_order INTEGER NOT NULL DEFAULT 0,
+                budget_cents INTEGER NOT NULL DEFAULT 0,
+                collapsed INTEGER NOT NULL DEFAULT 0
             )
             """.trimIndent()
         )
@@ -33,6 +35,7 @@ class AppDatabase private constructor(context: Context) :
                 total_cents INTEGER NOT NULL,
                 purchased INTEGER NOT NULL DEFAULT 0,
                 created_at INTEGER NOT NULL,
+                sort_order INTEGER NOT NULL DEFAULT 0,
                 FOREIGN KEY(category_id) REFERENCES categories(id) ON DELETE CASCADE
             )
             """.trimIndent()
@@ -42,12 +45,17 @@ class AppDatabase private constructor(context: Context) :
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        // Migrações futuras devem ser incrementais; nunca apagar dados existentes.
+        if (oldVersion < 2) {
+            db.execSQL("ALTER TABLE categories ADD COLUMN budget_cents INTEGER NOT NULL DEFAULT 0")
+            db.execSQL("ALTER TABLE categories ADD COLUMN collapsed INTEGER NOT NULL DEFAULT 0")
+            db.execSQL("ALTER TABLE items ADD COLUMN sort_order INTEGER NOT NULL DEFAULT 0")
+            db.execSQL("UPDATE items SET sort_order = id")
+        }
     }
 
     companion object {
         private const val DATABASE_NAME = "lista_nomade.db"
-        private const val DATABASE_VERSION = 1
+        private const val DATABASE_VERSION = 2
 
         @Volatile private var instance: AppDatabase? = null
 

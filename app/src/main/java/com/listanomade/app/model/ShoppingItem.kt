@@ -7,5 +7,6 @@ data class ShoppingItem(
     val unitPriceCents: Long,
     val quantity: Int,
     val totalCents: Long,
-    val purchased: Boolean
+    val purchased: Boolean,
+    val sortOrder: Int = 0
 )

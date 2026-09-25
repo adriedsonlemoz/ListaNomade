@@ -1,5 +1,29 @@
 # Changelog
 
+## [1.0.3] - 2026-09-25
+
+### Adicionado
+- Orçamento opcional por categoria, com indicação do valor planejado, saldo restante ou valor acima do limite.
+- Total geral separado em `Total`, `Pendente` e `Comprado` para acompanhar o que ainda falta adquirir.
+- Busca de itens e filtros `Todos`, `Pendentes` e `Comprados`.
+- Categorias recolhíveis com estado persistido entre aberturas do aplicativo.
+- Ordenação de itens por ordem personalizada, nome, maior valor, menor valor e pendentes primeiro.
+- Reordenação manual de categorias e itens por ações `Mover para cima` e `Mover para baixo`.
+- Ação `Salvar e adicionar outro` para cadastro sequencial de itens.
+- Duplicação de itens e exclusão com opção `Desfazer` durante alguns segundos.
+- Backup e restauração local em JSON usando o seletor de arquivos do Android, sem exigir permissões de armazenamento.
+
+### Melhorado
+- Digitação de preço unitário e orçamento com máscara monetária brasileira automática: os dígitos são convertidos diretamente para `R$ 0,00`, sem necessidade de inserir ponto ou vírgula manualmente.
+- Resumo das categorias agora mostra quantidade de itens, comprados e valor pendente mesmo quando a categoria está recolhida.
+- Persistência atualizada para armazenar orçamento, ordem dos itens e estado recolhido.
+- Migração SQLite incremental da versão anterior, preservando categorias e itens existentes.
+
+### Build e documentação
+- Versão sincronizada como `1.0.3+4` em `gradle.properties`, `github-manager.json`, `app_identity.json`, README e aplicativo.
+- Workflow continua preparando/publicando somente `Lista-Nomade-v<VERSAO>.apk`; não gera `source.zip` personalizado nem usa `actions/upload-artifact`.
+- Validação de versão e limite máximo de 500 linhas por arquivo Kotlin mantida antes do build.
+
 ## [1.0.2] - 2026-09-25
 
 ### Corrigido
