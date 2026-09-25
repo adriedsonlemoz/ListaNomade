@@ -85,8 +85,8 @@
     <string name="loading">Carregando…</string>
 
     <string-array name="recent_changes">
-        <item>Orçamentos por categoria, totais comprado/pendente, busca, filtros, recolhimento e ordenação de listas.</item>
-        <item>Valores monetários agora ganham pontuação brasileira automaticamente; também há duplicação, desfazer e “salvar e adicionar outro”.</item>
-        <item>Backup/restauração local adicionados, com migração segura dos dados existentes e workflow mantido somente com APK.</item>
+        <item>Categorias Bicicleta, Camping, Eletrônicos, Pesca, Alimentação, Ferramentas, Viagem e Outros agora são preparadas automaticamente.</item>
+        <item>Itens e preços de referência já discutidos foram pré-cadastrados para reduzir a digitação inicial e continuam totalmente editáveis.</item>
+        <item>A atualização adiciona somente padrões ausentes, preserva as listas existentes e mantém o workflow de Release somente com APK.</item>
     </string-array>
 </resources>

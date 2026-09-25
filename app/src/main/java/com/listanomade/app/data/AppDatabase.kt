@@ -41,7 +41,7 @@ class AppDatabase private constructor(context: Context) :
             """.trimIndent()
         )
         db.execSQL("CREATE INDEX idx_items_category ON items(category_id)")
-        db.execSQL("INSERT INTO categories(name, sort_order) VALUES('Bicicleta', 0)")
+        DefaultCatalog.seedMissing(db)
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
@@ -51,11 +51,14 @@ class AppDatabase private constructor(context: Context) :
             db.execSQL("ALTER TABLE items ADD COLUMN sort_order INTEGER NOT NULL DEFAULT 0")
             db.execSQL("UPDATE items SET sort_order = id")
         }
+        if (oldVersion < 3) {
+            DefaultCatalog.seedMissing(db)
+        }
     }
 
     companion object {
         private const val DATABASE_NAME = "lista_nomade.db"
-        private const val DATABASE_VERSION = 2
+        private const val DATABASE_VERSION = 3
 
         @Volatile private var instance: AppDatabase? = null
 

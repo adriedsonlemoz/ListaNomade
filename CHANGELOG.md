@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.0.4] - 2026-09-25
+
+### Adicionado
+- Catálogo inicial com as categorias `Bicicleta`, `Camping`, `Eletrônicos`, `Pesca`, `Alimentação`, `Ferramentas`, `Viagem` e `Outros`.
+- Itens de compra já definidos anteriormente foram pré-cadastrados com preços de referência editáveis, incluindo bicicleta, camping, energia/eletrônicos e pesca.
+- Migração do banco para schema 3, capaz de adicionar somente categorias e itens padrão ausentes em instalações já existentes.
+
+### Melhorado
+- Instalações novas já abrem com uma lista prática para uso imediato, reduzindo o cadastro manual.
+- A migração reconhece nomes alternativos de itens comuns para reduzir duplicações, inclusive `Câmara de Ar`, suporte de celular, farol, lona, power bank e itens de pesca.
+- Itens descartados ou substituídos nas listas anteriores não fazem parte do catálogo inicial.
+
+### Build e documentação
+- Versão sincronizada como `1.0.4+5` em `gradle.properties`, `github-manager.json`, `app_identity.json`, README, CHANGELOG e tela de informações.
+- Workflow continua preparando/publicando somente o APK da Release; não gera `source.zip` personalizado.
+
 ## [1.0.3] - 2026-09-25
 
 ### Adicionado

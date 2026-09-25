@@ -2,12 +2,13 @@
 
 Aplicativo Android nativo para organizar compras por categorias, com foco em uso rápido, funcionamento offline, baixo consumo e dados persistidos localmente.
 
-**Versão atual:** 1.0.3+4  
+**Versão atual:** 1.0.4+5  
 **applicationId:** `com.listanomade.app`
 
 ## Funcionalidades
 
-- Categoria inicial `Bicicleta` criada automaticamente no primeiro uso.
+- Catálogo inicial com `Bicicleta`, `Camping`, `Eletrônicos`, `Pesca`, `Alimentação`, `Ferramentas`, `Viagem` e `Outros`.
+- Itens já discutidos são pré-cadastrados com preços de referência editáveis, reduzindo o preenchimento manual.
 - Categorias independentes com itens, total, orçamento opcional e resumo de compras.
 - Totais no topo separados em total geral, valor pendente e valor já comprado.
 - Itens com nome, preço unitário, quantidade, total automático e estado comprado/não comprado.
@@ -22,11 +23,24 @@ Aplicativo Android nativo para organizar compras por categorias, com foco em uso
 - Tema claro/escuro persistente.
 - Tela de informações com versão, 3 últimas alterações e doação via cópia da chave Pix.
 
+## Catálogo inicial
+
+O catálogo padrão foi montado a partir das listas de compra já definidas para o projeto e evita recadastrar manualmente itens recorrentes. Os valores são referências editáveis:
+
+- `Bicicleta`: pezinho/descanso (R$ 19,00), suporte impermeável (R$ 23,00), sapatas GTS (R$ 13,99), kit 2 câmaras (R$ 24,99), farol (R$ 31,49) e cola + 6 remendos (R$ 16,00).
+- `Camping`: lona 4 × 3 m (R$ 38,90), fogareiro (R$ 27,99), saco de dormir (R$ 48,70), 2 cartuchos de gás (R$ 14,00 cada) e faca de camping (R$ 10,00).
+- `Eletrônicos`: power bank Geonav 10.000 mAh 20 W (R$ 137,68), tela Redmi Note 11 Pro+ 5G (R$ 95,27) e cabo USB-C 2 m (R$ 16,76).
+- `Pesca`: linha (R$ 10,00), 10 anzóis (R$ 0,30 cada) e 6 chumbadas (R$ 0,50 cada).
+- `Outros`: máquina de barba (R$ 19,99).
+- `Alimentação`, `Ferramentas` e `Viagem` são criadas prontas para receber itens.
+
+Itens anteriormente descartados ou substituídos não são recriados. A atualização para 1.0.4 também não repõe continuamente itens apagados: a inclusão automática ocorre apenas na criação do banco ou na migração para o schema 3, evitando que uma exclusão intencional volte a aparecer em toda abertura do aplicativo.
+
 ## Persistência
 
 O app utiliza `SQLiteOpenHelper` para listas e `SharedPreferences` para configurações. Valores monetários são armazenados em centavos (`Long`) para evitar erros de ponto flutuante.
 
-A versão 1.0.3 utiliza schema SQLite 2 e possui migração incremental a partir do schema anterior. A atualização preserva categorias e itens já cadastrados e acrescenta orçamento, ordem personalizada e estado recolhido.
+A versão 1.0.4 utiliza schema SQLite 3. A migração incremental preserva categorias e itens já cadastrados e acrescenta, uma única vez, apenas categorias e itens padrão que ainda não existam. Os preços iniciais são referências locais e permanecem editáveis.
 
 O backup exportado contém categorias, itens, preços, quantidades, status de compra, orçamento, ordem e configurações principais. A restauração substitui os dados locais atuais pelo conteúdo do arquivo escolhido.
 
