@@ -11,11 +11,17 @@
     <string name="empty_category">Nenhum item nesta categoria.</string>
     <string name="empty_filter">Nenhum item corresponde à busca/filtro.</string>
     <string name="category_total">Total da categoria</string>
-    <string name="category_summary">%1$d itens • %2$d resolvidos • %3$s pendentes</string>
+    <string name="category_summary">%1$d itens • %2$d resolvidos • %3$d parciais • %4$s pendentes</string>
     <string name="item_unit_line">%1$d × %2$s</string>
     <string name="purchased">Comprado</string>
     <string name="not_purchased">Pendente</string>
     <string name="already_have">Já tenho</string>
+    <string name="partial_purchase">Compra parcial</string>
+    <string name="partial_short">Parcial</string>
+    <string name="partial_state">Parcial %1$d/%2$d</string>
+    <string name="purchased_quantity">Quantidade comprada</string>
+    <string name="purchased_quantity_hint">Ex.: 2</string>
+    <string name="invalid_purchased_quantity">Na compra parcial, informe uma quantidade entre 1 e o total menos 1.</string>
     <string name="mark_owned">Marcar como Já tenho</string>
     <string name="mark_pending">Marcar como pendente</string>
     <string name="edit">Editar</string>
@@ -25,11 +31,18 @@
     <string name="move_down">Mover para baixo</string>
     <string name="more_options">Mais opções</string>
     <string name="open_product">Abrir produto</string>
+    <string name="price_history">Histórico de preços</string>
+    <string name="price_history_empty">Ainda não há alterações de preço para este item.</string>
+    <string name="price_history_line">%1$s • previsto %2$s • pago %3$s</string>
     <string name="invalid_product_link">Não foi possível abrir este link.</string>
     <string name="category_name">Nome da categoria</string>
     <string name="category_dialog_hint">Organize os itens em uma lista própria.</string>
     <string name="rename_category">Renomear categoria</string>
     <string name="delete_category">Excluir categoria</string>
+    <string name="archive_category">Arquivar categoria</string>
+    <string name="unarchive_category">Restaurar categoria</string>
+    <string name="save_as_template">Salvar como modelo</string>
+    <string name="share_category">Compartilhar categoria</string>
     <string name="collapse_category">Expandir ou recolher categoria</string>
     <string name="category_budget">Definir orçamento</string>
     <string name="category_budget_hint">Informe quanto pretende gastar nesta categoria.</string>
@@ -60,6 +73,11 @@
     <string name="store_hint">Ex.: Shopee, loja física…</string>
     <string name="product_link_optional">Link do produto (opcional)</string>
     <string name="product_link_hint">https://…</string>
+    <string name="purchase_target">Meta de compra</string>
+    <string name="no_target_date">Sem data definida</string>
+    <string name="choose_date">Escolher data</string>
+    <string name="clear_date">Limpar</string>
+    <string name="target_date_line">Meta %1$s</string>
     <string name="item_total">Valor total</string>
     <string name="expected_total">Previsto</string>
     <string name="paid_total">Pago</string>
@@ -82,12 +100,46 @@
     <string name="filter_pending">Pendentes</string>
     <string name="filter_purchased">Comprados</string>
     <string name="filter_owned">Já tenho</string>
+    <string name="filter_partial">Parciais</string>
+    <string name="filter_store_all">Todas as lojas</string>
+    <string name="filter_store_title">Loja</string>
     <string name="sort_custom">Ordem personalizada</string>
     <string name="sort_name">Nome A–Z</string>
     <string name="sort_price_desc">Maior valor</string>
     <string name="sort_price_asc">Menor valor</string>
     <string name="sort_pending_first">Pendentes primeiro</string>
     <string name="sort_priority">Prioridade</string>
+    <string name="sort_target_date">Data da meta</string>
+    <string name="tools">Ferramentas</string>
+    <string name="tools_short">Mais</string>
+    <string name="progress_panel">Painel de progresso</string>
+    <string name="progress_percent">%1$d%% concluído</string>
+    <string name="progress_counts">%1$d itens • %2$d comprados • %3$d já tenho • %4$d parciais • %5$d pendentes</string>
+    <string name="progress_money">Gasto %1$s • Pendente %2$s</string>
+    <string name="travel_mode">Modo viagem</string>
+    <string name="travel_mode_description">Mostra somente itens essenciais que ainda estão pendentes.</string>
+    <string name="travel_mode_banner">Modo viagem • essenciais pendentes</string>
+    <string name="bulk_import">Importar lista por texto</string>
+    <string name="bulk_import_description">Uma linha por item. Use Nome | preço | quantidade. Preço e quantidade são opcionais.</string>
+    <string name="bulk_import_hint">Ex.: Água | 5,50 | 2</string>
+    <string name="import_items">Importar itens</string>
+    <string name="import_success">%1$d itens importados.</string>
+    <string name="import_empty">Nenhum item válido foi encontrado.</string>
+    <string name="templates">Modelos de lista</string>
+    <string name="template_name">Nome do modelo</string>
+    <string name="template_saved">Modelo salvo.</string>
+    <string name="template_exists">Já existe um modelo com esse nome.</string>
+    <string name="template_empty">Nenhum modelo salvo ainda.</string>
+    <string name="create_from_template">Criar lista</string>
+    <string name="delete_template">Excluir modelo</string>
+    <string name="template_category_name">Nome da nova categoria</string>
+    <string name="template_created">Lista criada a partir do modelo.</string>
+    <string name="archived_categories">Categorias arquivadas</string>
+    <string name="archived_empty">Nenhuma categoria arquivada.</string>
+    <string name="category_archived">Categoria arquivada.</string>
+    <string name="category_unarchived">Categoria restaurada.</string>
+    <string name="share_all">Compartilhar lista completa</string>
+    <string name="share_with">Compartilhar com…</string>
     <string name="about_app">Sobre o app</string>
     <string name="version_format">Versão %1$s (%2$d)</string>
     <string name="recent_changes_title">3 últimas alterações</string>
@@ -114,8 +166,8 @@
     <string name="loading">Carregando…</string>
 
     <string-array name="recent_changes">
-        <item>Itens agora podem ser marcados como Já tenho e classificados por prioridade Essencial, Importante ou Opcional.</item>
-        <item>Orçamento geral, preço previsto versus preço pago e economia ou excesso passam a acompanhar as compras.</item>
-        <item>Loja e link do produto podem ser salvos no item, abertos pela lista e incluídos no backup local.</item>
+        <item>Compras parciais, histórico de preços e metas por data passaram a acompanhar cada item.</item>
+        <item>Categorias podem ser arquivadas, compartilhadas e salvas como modelos reutilizáveis; listas também podem ser importadas em massa por texto.</item>
+        <item>Novo painel de progresso, filtro por loja, modo viagem e catálogo ampliado com Energia, bateria externa e itens de camping.</item>
     </string-array>
 </resources>

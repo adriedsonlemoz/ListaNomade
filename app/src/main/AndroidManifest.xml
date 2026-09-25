@@ -10,6 +10,9 @@
         android:theme="@style/Theme.ListaNomade">
 
         <activity
+            android:name=".ui.tools.ToolsActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.settings.SettingsActivity"
             android:exported="false" />
         <activity

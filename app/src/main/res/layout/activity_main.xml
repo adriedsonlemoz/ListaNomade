@@ -127,6 +127,21 @@
         </LinearLayout>
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/textTravelMode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/bg_button_secondary"
+        android:gravity="center"
+        android:paddingTop="7dp"
+        android:paddingBottom="7dp"
+        android:text="@string/travel_mode_banner"
+        android:textColor="@color/accent"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:visibility="gone" />
+
     <EditText
         android:id="@+id/inputSearch"
         android:layout_width="match_parent"
@@ -173,6 +188,20 @@
             android:background="@drawable/bg_button_secondary"
             android:minHeight="0dp"
             android:text="@string/sort_custom"
+            android:textAllCaps="false"
+            android:textColor="@color/accent"
+            android:textSize="12sp" />
+
+        <Space android:layout_width="8dp" android:layout_height="1dp" />
+
+        <Button
+            android:id="@+id/buttonTools"
+            android:layout_width="0dp"
+            android:layout_height="36dp"
+            android:layout_weight="0.72"
+            android:background="@drawable/bg_button_secondary"
+            android:minHeight="0dp"
+            android:text="@string/tools_short"
             android:textAllCaps="false"
             android:textColor="@color/accent"
             android:textSize="12sp" />

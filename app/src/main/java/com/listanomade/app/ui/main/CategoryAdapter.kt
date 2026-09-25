@@ -64,6 +64,7 @@ class CategoryAdapter(
                 R.string.category_summary,
                 list.items.size,
                 list.resolvedCount,
+                list.partialCount,
                 MoneyFormatter.format(list.pendingCents)
             )
             bindBudget(list)

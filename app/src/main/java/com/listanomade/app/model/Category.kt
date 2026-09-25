@@ -5,5 +5,6 @@ data class Category(
     val name: String,
     val sortOrder: Int,
     val budgetCents: Long = 0L,
-    val collapsed: Boolean = false
+    val collapsed: Boolean = false,
+    val archived: Boolean = false
 )

@@ -1,5 +1,31 @@
 # Changelog
 
+## [1.0.6] - 2026-09-25
+
+### Adicionado
+- Compra parcial por item, com quantidade já comprada, cálculo do valor efetivamente gasto e saldo restante das unidades pendentes.
+- Histórico de preços com data para alterações de preço previsto e preço pago.
+- Meta de compra opcional por item e ordenação pela data mais próxima.
+- Arquivamento de categorias com restauração posterior, sem perda dos itens.
+- Painel de progresso com percentual baseado nas quantidades, contagem de comprados, parciais, `Já tenho` e pendentes, além de valores gasto e restante.
+- Compartilhamento de uma categoria ou da lista completa em texto pelo compartilhamento nativo do Android.
+- Modelos reutilizáveis: qualquer categoria pode ser salva como modelo e recriada depois como uma nova lista.
+- Importação em massa por texto usando `Nome | preço | quantidade`, com preço e quantidade opcionais.
+- Filtro por loja/origem e novo `Modo viagem`, que exibe somente itens Essenciais ainda pendentes.
+- Categoria `Energia`, com `Bateria externa / Power bank Geonav 10.000 mAh 20 W` por R$ 137,68 e `Cabo USB-C PD 2 m` por R$ 16,76; instalações existentes movem esses itens de Eletrônicos sem duplicá-los.
+- Catálogo de camping ampliado com `Lanterna Voxo T9 recarregável` por R$ 29,00 e `Barraca Ontrek Iglu 4 pessoas` por R$ 86,45, já marcada como `Já tenho` para não entrar no gasto pendente.
+
+### Melhorado
+- Totais agora consideram corretamente compras parciais: unidades adquiridas usam o preço pago quando informado e unidades restantes continuam usando o preço previsto.
+- Backup local atualizado para schema 4, incluindo categorias arquivadas, compra parcial, histórico de preços, metas, modelos, filtro por loja e modo viagem.
+- Resumo de categoria passa a informar itens parcialmente comprados.
+- Catálogo padrão separa itens de energia dos demais eletrônicos e mantém preços de referência editáveis.
+
+### Persistência, build e documentação
+- SQLite migrado incrementalmente do schema 4 para o schema 5, preservando categorias, itens, estados e preços existentes.
+- Versão sincronizada como `1.0.6+7` em `gradle.properties`, `github-manager.json`, `app_identity.json`, README, CHANGELOG e tela de informações.
+- Workflow continua preparando/publicando somente o APK da Release; não gera `source.zip` personalizado nem usa `actions/upload-artifact`.
+
 ## [1.0.5] - 2026-09-25
 
 ### Adicionado

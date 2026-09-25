@@ -2,32 +2,39 @@
 
 Aplicativo Android nativo para organizar compras por categorias, com foco em uso rápido, funcionamento offline, baixo consumo e dados persistidos localmente.
 
-**Versão atual:** 1.0.5+6  
+**Versão atual:** 1.0.6+7  
 **applicationId:** `com.listanomade.app`
 
 ## Funcionalidades
 
-- Catálogo inicial com `Bicicleta`, `Camping`, `Eletrônicos`, `Pesca`, `Alimentação`, `Ferramentas`, `Viagem` e `Outros`.
+- Catálogo inicial com `Bicicleta`, `Camping`, `Energia`, `Eletrônicos`, `Pesca`, `Alimentação`, `Ferramentas`, `Viagem` e `Outros`.
 - Itens de referência pré-cadastrados com preços editáveis para reduzir o preenchimento manual.
 - Categorias independentes com orçamento opcional, totais, busca, filtros, recolhimento e ordenação.
 - Orçamento geral para todas as compras, com saldo restante ou indicação de valor acima do limite.
-- Estados `Pendente`, `Comprado` e `Já tenho`; itens `Já tenho` permanecem na lista sem entrar no valor que falta gastar.
+- Estados `Pendente`, `Compra parcial`, `Comprado` e `Já tenho`; compras parciais acompanham quantas unidades já foram adquiridas e recalculam gasto e valor restante.
 - Prioridades `Essencial`, `Importante` e `Opcional`, inclusive com ordenação por prioridade.
 - Preço previsto e preço realmente pago no mesmo item. Quando o preço pago é informado, os totais de compras concluídas usam o valor real e a lista mostra economia ou excesso.
 - Loja/origem do preço e link opcional do produto; o link pode ser aberto diretamente pelo menu do item.
+- Histórico de preços por item, guardando alterações do preço previsto e do preço pago com data.
+- Meta de compra opcional por item, com ordenação por data.
 - Quantidade, cálculo automático de totais e máscara monetária brasileira durante a digitação.
 - Totais no topo separados em total geral, pendente e comprado.
-- Busca por nome do item ou loja e filtros `Todos`, `Pendentes`, `Comprados` e `Já tenho`.
+- Busca por nome do item ou loja e filtros `Todos`, `Pendentes`, `Comprados`, `Parciais`, `Já tenho` e por loja.
 - Ordenação personalizada, por prioridade, nome, maior/menor valor ou pendentes primeiro.
 - Edição, duplicação, reordenação e exclusão com `Desfazer`.
 - Fluxo `Salvar e adicionar outro` para preenchimento sequencial.
-- Backup e restauração local em JSON pelo seletor nativo de arquivos do Android.
+- Categorias podem ser arquivadas/restauradas, compartilhadas como texto e salvas como modelos reutilizáveis.
+- Importação em massa por texto no formato `Nome | preço | quantidade`.
+- Painel de progresso com percentual, quantidades e valores gasto/pendente.
+- Modo viagem para mostrar somente itens essenciais ainda pendentes.
+- Backup e restauração local em JSON pelo seletor nativo de arquivos do Android, incluindo modelos, histórico de preços, metas por data, categorias arquivadas e configurações novas.
 - Tema claro/escuro persistente, informações da versão e doação via cópia da chave Pix.
 
 ## Regras dos totais
 
 - `Pendente`: usa o preço previsto dos itens ainda não resolvidos.
 - `Comprado`: usa o preço pago quando informado; se ficar em branco, usa o preço previsto.
+- `Compra parcial`: as unidades já compradas usam o preço pago/previsto e as unidades restantes continuam usando o preço previsto.
 - `Já tenho`: não entra no valor pendente, comprado, total efetivo ou orçamento.
 - `Total geral`: soma o custo efetivo das compras — valores reais dos comprados mais valores previstos dos pendentes.
 - Orçamentos de categoria e orçamento geral usam a mesma regra do total efetivo.
@@ -37,8 +44,9 @@ Aplicativo Android nativo para organizar compras por categorias, com foco em uso
 Os valores abaixo são referências locais e permanecem editáveis:
 
 - `Bicicleta`: pezinho/descanso (R$ 19,00), suporte impermeável (R$ 23,00), sapatas GTS (R$ 13,99), kit 2 câmaras (R$ 24,99), farol (R$ 31,49) e cola + 6 remendos (R$ 16,00).
-- `Camping`: lona 4 × 3 m (R$ 38,90), fogareiro (R$ 27,99), saco de dormir (R$ 48,70), 2 cartuchos de gás (R$ 14,00 cada) e faca de camping (R$ 10,00).
-- `Eletrônicos`: power bank Geonav 10.000 mAh 20 W (R$ 137,68), tela Redmi Note 11 Pro+ 5G (R$ 95,27) e cabo USB-C 2 m (R$ 16,76).
+- `Camping`: lona 4 × 3 m (R$ 38,90), fogareiro (R$ 27,99), saco de dormir (R$ 48,70), 2 cartuchos de gás (R$ 14,00 cada), faca de camping (R$ 10,00), lanterna Voxo T9 recarregável (R$ 29,00) e barraca Ontrek Iglu 4 pessoas (R$ 86,45), já marcada como `Já tenho`.
+- `Energia`: bateria externa / power bank Geonav 10.000 mAh 20 W (R$ 137,68) e cabo USB-C PD 2 m (R$ 16,76).
+- `Eletrônicos`: tela Redmi Note 11 Pro+ 5G (R$ 95,27).
 - `Pesca`: linha (R$ 10,00), 10 anzóis (R$ 0,30 cada) e 6 chumbadas (R$ 0,50 cada).
 - `Outros`: máquina de barba (R$ 19,99).
 - `Alimentação`, `Ferramentas` e `Viagem` são criadas prontas para receber itens.
@@ -49,17 +57,18 @@ Itens excluídos pelo usuário não são recriados em toda abertura; o catálogo
 
 O app utiliza `SQLiteOpenHelper` para categorias e itens e `SharedPreferences` para configurações. Valores monetários são armazenados em centavos (`Long`) para evitar erros de ponto flutuante.
 
-A versão 1.0.5 utiliza **schema SQLite 4**. A migração adiciona `Já tenho`, prioridade, preço pago, loja e link sem apagar os registros anteriores. Itens existentes recebem `Importante` como prioridade inicial e mantêm seu estado de compra.
+A versão 1.0.6 utiliza **schema SQLite 5**. A migração adiciona compra parcial, data/meta, arquivamento de categorias, histórico de preços e modelos sem apagar os registros anteriores. Ela também cria a categoria `Energia`, move para ela power bank/cabo PD quando já existirem e acrescenta somente os novos itens de catálogo desta versão, sem recriar itens antigos que o usuário tenha excluído. Itens antigos marcados como comprados recebem automaticamente a quantidade comprada completa.
 
-O backup exportado usa schema 3 e inclui categorias, itens, preços previstos e pagos, quantidades, estados, prioridades, loja/link, orçamentos, ordem e configurações principais, incluindo o orçamento geral.
+O backup exportado usa schema 4 e inclui categorias ativas/arquivadas, itens, compra parcial, preços e histórico, metas por data, modelos, prioridades, loja/link, orçamentos, ordem e configurações principais, incluindo modo viagem e filtro por loja.
 
 ## Interface
 
 - Áreas seguras respeitam barras de status e navegação do Android.
 - Cartões e formulários compactos para aproveitar telas pequenas.
 - Preço previsto, quantidade, categoria, situação e prioridade ficam acessíveis no cadastro/edição.
-- O campo `Preço pago` aparece quando o item está como `Comprado`.
-- Itens exibem situação, prioridade, loja e diferenças entre previsto e pago quando aplicável.
+- O campo `Preço pago` aparece quando o item está como `Comprado` ou `Compra parcial`.
+- Itens exibem situação, prioridade, compra parcial, meta por data, loja e diferenças entre previsto e pago quando aplicável.
+- A tela principal possui acesso a Ferramentas para painel, modelos, importação, arquivadas, compartilhamento e modo viagem.
 - O orçamento geral é configurável diretamente no cartão de totais.
 
 ## Base técnica
@@ -79,6 +88,7 @@ O backup exportado usa schema 3 e inclui categorias, itens, preços previstos e 
 - `ui/main/`: tela principal, filtros, totais e adaptadores.
 - `ui/item/`: inclusão e edição de itens.
 - `ui/settings/`: informações, tema, backup e doação.
+- `ui/tools/`: painel de progresso, modelos, importação, arquivadas, compartilhamento e modo viagem.
 - `util/`: dinheiro, máscara monetária, preferências, tema e áreas seguras.
 - `scripts/`: validações de versão e arquitetura.
 

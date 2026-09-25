@@ -11,6 +11,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.listanomade.app.R
 import com.listanomade.app.model.ShoppingItem
+import com.listanomade.app.util.DateFormatter
 import com.listanomade.app.util.MoneyFormatter
 
 class ItemAdapter(
@@ -25,9 +26,8 @@ class ItemAdapter(
         notifyDataSetChanged()
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
-        return ItemViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_shopping, parent, false))
-    }
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder =
+        ItemViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_shopping, parent, false))
 
     override fun getItemCount(): Int = items.size
     override fun onBindViewHolder(holder: ItemViewHolder, position: Int) = holder.bind(items[position])
@@ -50,7 +50,7 @@ class ItemAdapter(
             unit.text = context.getString(R.string.item_unit_line, item.quantity, MoneyFormatter.format(item.unitPriceCents))
             bindState(item)
             bindExtra(item)
-            total.text = MoneyFormatter.format(if (item.purchased) item.actualTotalCents else item.totalCents)
+            total.text = MoneyFormatter.format(if (item.owned) item.totalCents else item.effectiveCostCents)
 
             val strike = if (item.resolved) Paint.STRIKE_THRU_TEXT_FLAG else 0
             name.paintFlags = (name.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()) or strike
@@ -62,20 +62,33 @@ class ItemAdapter(
         }
 
         private fun bindState(item: ShoppingItem) {
-            val (label, color) = when {
-                item.owned -> R.string.already_have to R.color.status_owned
-                item.purchased -> R.string.purchased to R.color.status_purchased
-                else -> R.string.not_purchased to R.color.status_pending
+            val context = itemView.context
+            when {
+                item.owned -> {
+                    state.setText(R.string.already_have)
+                    state.setTextColor(context.getColor(R.color.status_owned))
+                }
+                item.fullyPurchased -> {
+                    state.setText(R.string.purchased)
+                    state.setTextColor(context.getColor(R.color.status_purchased))
+                }
+                item.partial -> {
+                    state.text = context.getString(R.string.partial_state, item.boughtQuantity, item.quantity)
+                    state.setTextColor(context.getColor(R.color.status_pending))
+                }
+                else -> {
+                    state.setText(R.string.not_purchased)
+                    state.setTextColor(context.getColor(R.color.status_pending))
+                }
             }
-            state.setText(label)
-            state.setTextColor(itemView.context.getColor(color))
         }
 
         private fun bindExtra(item: ShoppingItem) {
             val context = itemView.context
             val parts = mutableListOf(priorityLabel(item))
             if (item.store.isNotBlank()) parts += item.store
-            if (item.purchased && item.actualUnitPriceCents > 0L) {
+            if (item.targetDateMillis > 0L) parts += context.getString(R.string.target_date_line, DateFormatter.format(item.targetDateMillis))
+            if (item.boughtQuantity > 0 && item.actualUnitPriceCents > 0L) {
                 parts += context.getString(R.string.price_paid_line, MoneyFormatter.format(item.actualUnitPriceCents))
                 when {
                     item.savingsCents > 0L -> parts += context.getString(R.string.price_saved_line, MoneyFormatter.format(item.savingsCents))
