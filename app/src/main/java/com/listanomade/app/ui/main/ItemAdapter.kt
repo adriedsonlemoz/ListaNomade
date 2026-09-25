@@ -15,8 +15,7 @@ import com.listanomade.app.util.MoneyFormatter
 
 class ItemAdapter(
     private val onPurchasedChanged: (ShoppingItem, Boolean) -> Unit,
-    private val onEdit: (ShoppingItem) -> Unit,
-    private val onDelete: (ShoppingItem) -> Unit
+    private val onMore: (View, ShoppingItem) -> Unit
 ) : RecyclerView.Adapter<ItemAdapter.ItemViewHolder>() {
 
     private var items: List<ShoppingItem> = emptyList()
@@ -44,25 +43,32 @@ class ItemAdapter(
         private val unit: TextView = view.findViewById(R.id.textItemUnit)
         private val state: TextView = view.findViewById(R.id.textItemState)
         private val total: TextView = view.findViewById(R.id.textItemTotal)
-        private val edit: ImageButton = view.findViewById(R.id.buttonEdit)
-        private val delete: ImageButton = view.findViewById(R.id.buttonDelete)
+        private val more: ImageButton = view.findViewById(R.id.buttonItemMore)
 
         fun bind(item: ShoppingItem) {
             check.setOnCheckedChangeListener(null)
             check.isChecked = item.purchased
             name.text = item.name
-            unit.text = itemView.context.getString(R.string.item_unit_line, item.quantity, MoneyFormatter.format(item.unitPriceCents))
-            state.text = itemView.context.getString(if (item.purchased) R.string.purchased else R.string.not_purchased)
+            unit.text = itemView.context.getString(
+                R.string.item_unit_line,
+                item.quantity,
+                MoneyFormatter.format(item.unitPriceCents)
+            )
+            state.setText(if (item.purchased) R.string.purchased else R.string.not_purchased)
+            state.setTextColor(
+                itemView.context.getColor(
+                    if (item.purchased) R.color.status_purchased else R.color.status_pending
+                )
+            )
             total.text = MoneyFormatter.format(item.totalCents)
 
             val strike = if (item.purchased) Paint.STRIKE_THRU_TEXT_FLAG else 0
             name.paintFlags = (name.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()) or strike
-            container.alpha = if (item.purchased) 0.70f else 1.0f
+            container.alpha = if (item.purchased) 0.78f else 1.0f
             container.isSelected = item.purchased
 
             check.setOnCheckedChangeListener { _, checked -> onPurchasedChanged(item, checked) }
-            edit.setOnClickListener { onEdit(item) }
-            delete.setOnClickListener { onDelete(item) }
+            more.setOnClickListener { onMore(it, item) }
         }
     }
 }

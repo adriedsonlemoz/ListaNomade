@@ -2,7 +2,7 @@
 
 Aplicativo Android nativo para listas de compras por categorias, focado em uso rápido, armazenamento local e baixo consumo.
 
-**Versão atual:** 1.0.1+2  
+**Versão atual:** 1.0.2+3  
 **applicationId:** `com.listanomade.app`
 
 ## Funcionalidades
@@ -16,6 +16,20 @@ Aplicativo Android nativo para listas de compras por categorias, focado em uso r
 - Tela de informações com versão, 3 últimas alterações e botão de doação que copia a chave Pix.
 - Persistência local por `SQLiteOpenHelper`; preferências por `SharedPreferences`.
 - Valores monetários armazenados em centavos (`Long`), sem erros de ponto flutuante na persistência.
+
+## Interface
+
+A versão 1.0.2 reorganiza a interface para uso diário em telas pequenas e recentes:
+
+- conteúdo respeita automaticamente as áreas da barra de status e da navegação do Android;
+- botão inferior `Adicionar item` permanece totalmente visível acima da navegação do sistema;
+- cabeçalho e cartões usam menos espaço vertical;
+- formulário de item combina preço e quantidade na mesma linha e identifica visualmente a seleção de categoria;
+- itens usam um único menu de ações para editar/excluir, reduzindo poluição visual;
+- estados `Pendente` e `Comprado` possuem cores distintas;
+- diálogo de categoria segue a mesma linguagem visual do restante do aplicativo;
+- área de doação foi reduzida para não competir com as configurações principais;
+- contraste de textos secundários e estados desabilitados foi reforçado.
 
 ## Base técnica
 
@@ -34,8 +48,8 @@ Aplicativo Android nativo para listas de compras por categorias, focado em uso r
 - `ui/main/`: tela principal e adaptadores.
 - `ui/item/`: inclusão/edição.
 - `ui/settings/`: informações, tema e doação.
-- `util/`: dinheiro, preferências e tema.
-- `scripts/`: validação de versão e empacotamento do código-fonte.
+- `util/`: dinheiro, preferências, tema e tratamento das áreas seguras do sistema.
+- `scripts/`: validação de versão e arquitetura.
 
 Nenhum arquivo Kotlin deve ultrapassar 500 linhas. `scripts/verify_versions.py` valida essa regra e o sincronismo de versão.
 
@@ -48,7 +62,7 @@ python3 scripts/verify_versions.py
 gradle :app:assembleDebug
 ```
 
-Para Release assinado, defina `ANDROID_KEYSTORE_PATH`, `KEYSTORE_PASSWORD`, `KEY_ALIAS` e `KEY_PASSWORD` antes do build.
+Para Release assinado, defina `ANDROID_KEYSTORE_PATH`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS` e `ANDROID_KEY_PASSWORD` antes do build.
 
 ## GitHub Actions
 
@@ -60,9 +74,9 @@ O workflow `.github/workflows/release.yml`:
 4. valida versões e limite de linhas;
 5. compila Release assinado e verifica a assinatura com `apksigner`;
 6. cria `Lista-Nomade-v<VERSAO>.apk`;
-7. cria `Lista-Nomade-v<VERSAO>-source.zip` somente com conteúdo versionado do repositório;
-8. publica ambos diretamente na GitHub Release.
+7. valida que `dist/` contém somente esse APK;
+8. publica diretamente o APK na GitHub Release.
 
-O workflow **não usa `actions/upload-artifact`** para entregar o APK.
+O workflow **não usa `actions/upload-artifact`** e **não gera mais `Lista-Nomade-v<VERSAO>-source.zip`**. GitHub Releases pode continuar exibindo os arquivos automáticos `Source code (zip)` e `Source code (tar.gz)` gerados pelo próprio GitHub; eles não são artifacts criados pelo workflow do projeto.
 
 Veja `SIGNING.md` para configurar os Secrets.

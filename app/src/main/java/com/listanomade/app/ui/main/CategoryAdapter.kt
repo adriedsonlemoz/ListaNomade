@@ -17,8 +17,7 @@ class CategoryAdapter(
     private val onAddItem: (Long) -> Unit,
     private val onMore: (View, CategoryList) -> Unit,
     private val onPurchasedChanged: (ShoppingItem, Boolean) -> Unit,
-    private val onEditItem: (ShoppingItem) -> Unit,
-    private val onDeleteItem: (ShoppingItem) -> Unit
+    private val onItemMore: (View, ShoppingItem) -> Unit
 ) : RecyclerView.Adapter<CategoryAdapter.CategoryViewHolder>() {
 
     private var categories: List<CategoryList> = emptyList()
@@ -47,7 +46,7 @@ class CategoryAdapter(
         private val addItem: Button = view.findViewById(R.id.buttonCategoryAddItem)
         private val more: ImageButton = view.findViewById(R.id.buttonCategoryMore)
         private val recycler: RecyclerView = view.findViewById(R.id.recyclerItems)
-        private val itemAdapter = ItemAdapter(onPurchasedChanged, onEditItem, onDeleteItem)
+        private val itemAdapter = ItemAdapter(onPurchasedChanged, onItemMore)
 
         init {
             recycler.layoutManager = LinearLayoutManager(itemView.context)

@@ -2,6 +2,8 @@
     <string name="app_name">Lista Nômade</string>
     <string name="settings">Informações e configurações</string>
     <string name="add_category">Adicionar categoria</string>
+    <string name="category_short_action">+ Categoria</string>
+    <string name="item_short_action">+ Item</string>
     <string name="general_total">Total geral</string>
     <string name="pending_total">Pendente: %1$s</string>
     <string name="add_item">Adicionar item</string>
@@ -15,11 +17,13 @@
     <string name="delete">Excluir</string>
     <string name="more_options">Mais opções</string>
     <string name="category_name">Nome da categoria</string>
+    <string name="category_dialog_hint">Organize os itens em uma lista própria.</string>
     <string name="rename_category">Renomear categoria</string>
     <string name="delete_category">Excluir categoria</string>
     <string name="cancel">Cancelar</string>
     <string name="save">Salvar</string>
     <string name="name">Nome</string>
+    <string name="item_name_hint">Ex.: Câmara de ar</string>
     <string name="unit_price">Preço unitário</string>
     <string name="quantity">Quantidade</string>
     <string name="category">Categoria</string>
@@ -38,8 +42,9 @@
     <string name="recent_changes_title">3 últimas alterações</string>
     <string name="theme_title">Tema</string>
     <string name="dark_theme">Tema escuro</string>
+    <string name="support_project">Apoiar o projeto</string>
     <string name="donation">Doação</string>
-    <string name="donation_description">Copiar chave Pix para apoiar o projeto</string>
+    <string name="donation_description">Copiar a chave Pix para a área de transferência.</string>
     <string name="pix_key">adriedson@outlook.com</string>
     <string name="pix_copied">Chave Pix copiada.</string>
     <string name="back">Voltar</string>
@@ -48,8 +53,8 @@
     <string name="loading">Carregando…</string>
 
     <string-array name="recent_changes">
-        <item>Assinatura do GitHub Actions compatível com os Secrets importados pelo GitHub Manager.</item>
-        <item>Compatibilidade mantida com os nomes antigos de Secrets que usam o prefixo ANDROID_.</item>
-        <item>Validação de assinatura aprimorada antes da compilação Release.</item>
+        <item>Interface compactada e corrigida para respeitar as barras do sistema sem cortar ações.</item>
+        <item>Formulários, diálogos, menus e estados de compra receberam hierarquia visual mais clara.</item>
+        <item>Workflow agora publica somente o APK e não gera mais o source.zip personalizado.</item>
     </string-array>
 </resources>

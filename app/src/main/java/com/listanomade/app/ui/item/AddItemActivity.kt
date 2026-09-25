@@ -18,6 +18,7 @@ import com.listanomade.app.data.ShoppingRepository
 import com.listanomade.app.model.Category
 import com.listanomade.app.model.ShoppingItem
 import com.listanomade.app.util.MoneyFormatter
+import com.listanomade.app.util.SystemBarInsets
 import com.listanomade.app.util.ThemeManager
 import java.util.concurrent.Executors
 
@@ -38,6 +39,7 @@ class AddItemActivity : AppCompatActivity() {
         ThemeManager.applySavedTheme(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_item)
+        SystemBarInsets.apply(findViewById(R.id.rootAddItem))
         repository = ShoppingRepository(this)
         bindViews()
         configureActions()
@@ -87,7 +89,9 @@ class AddItemActivity : AppCompatActivity() {
         categories = loadedCategories
         editingItem = item
         val names = categories.map { it.name }
-        spinnerCategory.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, names)
+        spinnerCategory.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, names).also {
+            it.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        }
 
         val preferredCategoryId = item?.categoryId
             ?: intent.getLongExtra(EXTRA_CATEGORY_ID, -1L).takeIf { it > 0 }

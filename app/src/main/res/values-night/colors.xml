@@ -3,11 +3,14 @@
     <color name="surface">#171D21</color>
     <color name="surface_alt">#20282D</color>
     <color name="text_primary">#EEF4F5</color>
-    <color name="text_secondary">#A7B3BA</color>
+    <color name="text_secondary">#B2BEC5</color>
+    <color name="text_disabled">#7D898F</color>
     <color name="accent">#70D1C3</color>
     <color name="accent_soft">#183C38</color>
+    <color name="status_pending">#F0B45C</color>
+    <color name="status_purchased">#79D7A8</color>
     <color name="danger">#FFB4AB</color>
-    <color name="divider">#303A40</color>
-    <color name="purchased_bg">#18221F</color>
+    <color name="divider">#344047</color>
+    <color name="purchased_bg">#18261F</color>
     <color name="white">#FFFFFF</color>
 </resources>

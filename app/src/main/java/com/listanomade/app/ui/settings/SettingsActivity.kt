@@ -13,6 +13,7 @@ import androidx.appcompat.widget.SwitchCompat
 import com.listanomade.app.BuildConfig
 import com.listanomade.app.R
 import com.listanomade.app.util.SettingsStore
+import com.listanomade.app.util.SystemBarInsets
 import com.listanomade.app.util.ThemeManager
 
 class SettingsActivity : AppCompatActivity() {
@@ -20,6 +21,7 @@ class SettingsActivity : AppCompatActivity() {
         ThemeManager.applySavedTheme(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
+        SystemBarInsets.apply(findViewById(R.id.rootSettings))
 
         findViewById<ImageButton>(R.id.buttonBack).setOnClickListener { finish() }
         findViewById<TextView>(R.id.textVersion).text = getString(

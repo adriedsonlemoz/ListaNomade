@@ -1,10 +1,13 @@
 package com.listanomade.app.ui.main
 
+import android.app.Dialog
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.View
+import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
@@ -22,6 +25,7 @@ import com.listanomade.app.model.ShoppingItem
 import com.listanomade.app.ui.item.AddItemActivity
 import com.listanomade.app.ui.settings.SettingsActivity
 import com.listanomade.app.util.MoneyFormatter
+import com.listanomade.app.util.SystemBarInsets
 import com.listanomade.app.util.ThemeManager
 import java.util.concurrent.Executors
 
@@ -37,6 +41,7 @@ class MainActivity : AppCompatActivity() {
         ThemeManager.applySavedTheme(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        SystemBarInsets.apply(findViewById(R.id.rootMain))
         repository = ShoppingRepository(this)
         bindViews()
         configureList()
@@ -63,8 +68,7 @@ class MainActivity : AppCompatActivity() {
             onAddItem = ::openNewItem,
             onMore = ::showCategoryMenu,
             onPurchasedChanged = ::updatePurchased,
-            onEditItem = ::openEditItem,
-            onDeleteItem = ::confirmDeleteItem
+            onItemMore = ::showItemMenu
         )
         findViewById<RecyclerView>(R.id.recyclerCategories).apply {
             layoutManager = LinearLayoutManager(this@MainActivity)
@@ -114,6 +118,21 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun showItemMenu(anchor: View, item: ShoppingItem) {
+        PopupMenu(this, anchor).apply {
+            menu.add(getString(R.string.edit))
+            menu.add(getString(R.string.delete))
+            setOnMenuItemClickListener { menuItem ->
+                when (menuItem.title.toString()) {
+                    getString(R.string.edit) -> openEditItem(item)
+                    getString(R.string.delete) -> confirmDeleteItem(item)
+                }
+                true
+            }
+            show()
+        }
+    }
+
     private fun confirmDeleteItem(item: ShoppingItem) {
         AlertDialog.Builder(this)
             .setMessage(getString(R.string.delete_item_question, item.name))
@@ -144,42 +163,59 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showCategoryDialog(existing: CategoryList?) {
-        val input = EditText(this).apply {
-            hint = getString(R.string.category_name)
-            setText(existing?.category?.name.orEmpty())
-            setSelectAllOnFocus(true)
-            setPadding(48, 24, 48, 24)
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_category)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.setCanceledOnTouchOutside(true)
+
+        val title = dialog.findViewById<TextView>(R.id.textDialogTitle)
+        val input = dialog.findViewById<EditText>(R.id.inputCategoryName)
+        val cancel = dialog.findViewById<Button>(R.id.buttonDialogCancel)
+        val save = dialog.findViewById<Button>(R.id.buttonDialogSave)
+        title.setText(if (existing == null) R.string.add_category else R.string.rename_category)
+        input.setText(existing?.category?.name.orEmpty())
+        input.setSelectAllOnFocus(true)
+
+        cancel.setOnClickListener { dialog.dismiss() }
+        save.setOnClickListener { saveCategory(dialog, input, existing) }
+        input.setOnEditorActionListener { _, _, _ ->
+            save.performClick()
+            true
         }
-        val dialog = AlertDialog.Builder(this)
-            .setTitle(if (existing == null) R.string.add_category else R.string.rename_category)
-            .setView(input)
-            .setNegativeButton(R.string.cancel, null)
-            .setPositiveButton(R.string.save, null)
-            .create()
+
         dialog.setOnShowListener {
-            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
-                val name = input.text.toString().trim()
-                if (name.isBlank()) {
-                    input.error = getString(R.string.invalid_name)
-                    return@setOnClickListener
-                }
-                worker.execute {
-                    val ok = if (existing == null) repository.addCategory(name)
-                    else repository.renameCategory(existing.category.id, name)
-                    val data = repository.loadAll()
-                    mainHandler.post {
-                        if (!ok) {
-                            input.error = getString(R.string.category_exists)
-                        } else {
-                            dialog.dismiss()
-                            render(data)
-                            Toast.makeText(this, if (existing == null) R.string.category_added else R.string.category_renamed, Toast.LENGTH_SHORT).show()
-                        }
-                    }
+            val width = (resources.displayMetrics.widthPixels * 0.90f).toInt()
+            dialog.window?.setLayout(width, ViewGroup.LayoutParams.WRAP_CONTENT)
+            dialog.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
+            input.requestFocus()
+        }
+        dialog.show()
+    }
+
+    private fun saveCategory(dialog: Dialog, input: EditText, existing: CategoryList?) {
+        val name = input.text.toString().trim()
+        if (name.isBlank()) {
+            input.error = getString(R.string.invalid_name)
+            return
+        }
+        worker.execute {
+            val ok = if (existing == null) repository.addCategory(name)
+            else repository.renameCategory(existing.category.id, name)
+            val data = repository.loadAll()
+            mainHandler.post {
+                if (!ok) {
+                    input.error = getString(R.string.category_exists)
+                } else {
+                    dialog.dismiss()
+                    render(data)
+                    Toast.makeText(
+                        this,
+                        if (existing == null) R.string.category_added else R.string.category_renamed,
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
         }
-        dialog.show()
     }
 
     private fun confirmDeleteCategory(categoryList: CategoryList) {

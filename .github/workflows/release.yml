@@ -69,7 +69,7 @@ jobs:
       - name: Compilar Release assinado
         run: gradle clean :app:assembleRelease --no-daemon
 
-      - name: Preparar arquivos da Release
+      - name: Preparar APK da Release
         id: version
         shell: bash
         run: |
@@ -84,9 +84,8 @@ jobs:
           fi
           "$ANDROID_SDK_ROOT/build-tools/35.0.0/apksigner" verify --verbose "$APK"
           cp "$APK" "dist/Lista-Nomade-v${VERSION}.apk"
-          git archive --format=zip --output="dist/Lista-Nomade-v${VERSION}-source.zip" HEAD
           test -f "dist/Lista-Nomade-v${VERSION}.apk"
-          test -f "dist/Lista-Nomade-v${VERSION}-source.zip"
+          test "$(find dist -maxdepth 1 -type f | wc -l)" -eq 1 || { echo "A pasta dist deve conter somente o APK"; exit 1; }
 
       - name: Publicar GitHub Release
         uses: softprops/action-gh-release@v2
@@ -94,6 +93,4 @@ jobs:
           tag_name: v${{ steps.version.outputs.version }}
           name: Lista Nômade v${{ steps.version.outputs.version }}
           generate_release_notes: true
-          files: |
-            dist/Lista-Nomade-v${{ steps.version.outputs.version }}.apk
-            dist/Lista-Nomade-v${{ steps.version.outputs.version }}-source.zip
+          files: dist/Lista-Nomade-v${{ steps.version.outputs.version }}.apk
